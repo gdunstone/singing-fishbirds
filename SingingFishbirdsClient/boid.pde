@@ -175,7 +175,6 @@ void borders() {
     for (Boid other : boids) {
       float d = PVector.dist(location, other.location);
       //if the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
-      diameter = d/localsizemod;
       if ((d > 0) && (d < desiredseparation)) {
         //calculate vector pointing away from neighbor
 
