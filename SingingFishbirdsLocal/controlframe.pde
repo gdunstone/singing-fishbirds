@@ -29,7 +29,7 @@ public class ControlFrame extends PApplet {
   float alignmentforce = 0.0;
   float cohesionforce = 0.0;
   float maxspeed = 0.0;
-  float separationdistance = 25.0f;
+  float separationdistance = 25.0;
   float soundmodevar = 0;
   int visualsize = 0;
   int hue = 0;

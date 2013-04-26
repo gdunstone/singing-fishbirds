@@ -337,7 +337,6 @@ public void borders() {
   //Separation
   //method checks for nearby boids and steers away
   public PVector separate(ArrayList<Boid> boids) {
-    float desiredseparation = cf.separationdistance;
     PVector steer = new PVector(0, 0, 0);
     int count = 0;
     //for every boid in the system chech if its too close
@@ -345,9 +344,9 @@ public void borders() {
       float d = PVector.dist(location, other.location);
       //if the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
       diameter = d/cf.sizemod;
-      if ((d > 0) && (d < desiredseparation)) {
+      if ((d > 0) && (d < cf.separationdistance)) {
         //calculate vector pointing away from neighbor
-
+        println(cf.separationdistance);
         PVector diff = PVector.sub(location, other.location);
         diff.normalize();
         diff.div(d); //weight by distance.
