@@ -63,7 +63,7 @@ LIKE THE LICENSE IS ANGRY AND SHOUTING AT YOU?!?
   float localalignmentforce = 0.0f;
   float localcohesionforce = 0.0f;
   float localmaxspeed = 0.0f;
-  float localseparationdistance = 25.0f;
+  float localseparationdistance = 40.0f;
   float localsoundmodevar = 0;
   int localvisualsize = 0;
   int localhue = 0;
@@ -276,7 +276,7 @@ class Boid {
   float diameter;
   float maxforce; //maximum steering force
   float maxspeed; //max speed
-  float localseparationdistance = 25.0f;
+  //float localseparationdistance = 40.0;
 
   Boid(float x, float y) {
     acceleration = new PVector(0, 0);
@@ -436,17 +436,15 @@ public void borders() {
   //Separation
   //method checks for nearby boids and steers away
   public PVector separate(ArrayList<Boid> boids) {
-    float desiredseparation = localseparationdistance;
+   float desiredseparation = localseparationdistance;
     PVector steer = new PVector(0, 0, 0);
     int count = 0;
     //for every boid in the system chech if its too close
     for (Boid other : boids) {
-      float d = PVector.dist(location, other.location);
+      float d = PVector.dist(location, other.location); diameter = d/localsizemod;
       //if the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
-      diameter = d/localsizemod;
       if ((d > 0) && (d < desiredseparation)) {
         //calculate vector pointing away from neighbor
-
         PVector diff = PVector.sub(location, other.location);
         diff.normalize();
         diff.div(d); //weight by distance.

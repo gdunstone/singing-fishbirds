@@ -43,7 +43,7 @@ import netP5.*;
   float localalignmentforce = 0.0;
   float localcohesionforce = 0.0;
   float localmaxspeed = 0.0;
-  float localseparationdistance = 25.0;
+  float localseparationdistance = 40.0;
   float localsoundmodevar = 0;
   int localvisualsize = 0;
   int localhue = 0;
