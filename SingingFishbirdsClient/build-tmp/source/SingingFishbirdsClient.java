@@ -16,62 +16,122 @@ import java.io.InputStream;
 import java.io.OutputStream; 
 import java.io.IOException; 
 
-public class FlockingEntropicSynthOSCclient extends PApplet {
+public class SingingFishbirdsClient extends PApplet {
 
-// Flocking Code from:
-// http://processing.org/learning/topics/flocking.html
-// by Daniel Shiffman
-//
-// SuperCollider and oscP5 libraries from: 
-// http://www.erase.net/projects/processing-sc/ and http://www.sojamo.de/code/
-// With integration by Gareth Dunstone
-//
-// Control interface using controlP5 from:
-// http://www.sojamo.de/code/
-//
-// Other code by Gareth Dunstone
+/*
+Copyright (C) 2013, Gareth Dunstone 
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), 
+to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, pulverize, distribute, 
+synergize, compost, defenestrate, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, 
+subject to the following conditions: 
+
+- The above copyright notice and this permission notice, or one of similar effect, shall be included in all copies or substantial portions of the Software. 
+
+- If the Author of the Software (the "Author") needs a place to crash and you have a sofa available, you should maybe give the Author a break and let him sleep on your couch. 
+
+- If you are caught in a dire situation wherein you only have enough time to save one person out of a group, and the Author is a member of that group, you must save the Author. 
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO BLAH BLAH BLAH ISN'T IT FUNNY HOW UPPER-CASE MAKES IT SOUND 
+LIKE THE LICENSE IS ANGRY AND SHOUTING AT YOU?!?
+
+ Flocking Code from:
+ http://processing.org/learning/topics/flocking.html
+ by Daniel Shiffman
+
+ SuperCollider and oscP5 libraries from: 
+ http://www.erase.net/projects/processing-sc/ and http://www.sojamo.de/code/
+ With integration by Gareth Dunstone
+
+ Control interface using controlP5 from:
+ http://www.sojamo.de/code/
+
+ Other code by Gareth Dunstone
+*/
 
 
 
 
 
-  int localfreqModulation = 0;
-  int localreverbvar = 0;
-  int localneighbordist = 0;
-  float localsizemod = 0;
-  float localsweight = 0;
+  float localfreqModulation = 1;
+  float localreverbvar = 1;
+  float localneighbordist = 0.0f;
+  float localsizemod = 2;
+  float localsweight = 1;
   float localpanmod = 1;
-  float localseparationforce = 0.0f;
-  float localalignmentforce = 0.0f;
-  float localcohesionforce = 0.0f;
-  float localmaxspeed = 0.0f;
-  float localseparationdistance = 25.0f;
+  float localseparationforce = 1.5f;
+  float localalignmentforce = 1.0f;
+  float localcohesionforce = 1.1f;
+  float localmaxspeed = 2;
+  float localseparationdistance = 40.0f;
   float localsoundmodevar = 0;
-  int localvisualsize = 0;
-  int localhue = 0;
-  int localsaturation = 0;
-  int localbrightness = 0;
-  int localalpha = 0;
-  float localmode = 0.0f;
-  int localstartedval=0;
-  int localexitval = 0;
-  float localforexport = 0;
-  int localbackgroundalpha = 10;
-  int localsavescreen = 0;
-int number = 22;
+  float localvisualsize = 2;
+  float localhue = 80;
+  float localsaturation = 255;
+  float localbrightness = 255;
+  float localalpha = 100;
+  float localmode = 3.0f;
+  float localstartedval=0.0f;
+  float localexitval = 0;
+  float localbackgroundalpha = 10;
+  float localsavescreen = 0;
+  float attractionval = 0.0f;
+  float localforexport = 0.0f;
+  float localmousex = 0.0f;
+  float localmousey = 0.0f;
+  float localxyweight = 0.0f;
+  float localxlocation = 0.0f;
+  float localylocation = 0.0f;
+
+
+float number = 22;
 Synth reverb;
 Flock flock;
 
 public void setup() {
-  size(1024,768);
+  size(1350,750);
   colorMode(HSB);
   oscP5 = new OscP5(this,12000);
 
   myRemoteLocation = new NetAddress("127.0.0.1",12000);
 
   oscP5.plug(this,"test","/test");
+
+  /*sound plugs*/
+  oscP5.plug(this,"freq","/sound/Freq");
+  oscP5.plug(this,"reverb","/sound/reverb");
+  oscP5.plug(this,"panmod","/sound/PanWeight");
+
+  /*mech plugs*/
+  oscP5.plug(this,"maxspeed","/mech/maxspeed");
+  oscP5.plug(this,"alignmentforce","/mech/alignment");
+  oscP5.plug(this,"separationforce","/mech/separation");
+  oscP5.plug(this,"separationdistance","/mech/sepdistance");
+  oscP5.plug(this,"cohesionforce","/mech/cohesion");
+  oscP5.plug(this,"neighbordist","/mech/neighbor");
+  oscP5.plug(this,"attraction","/mech/attraction");
+
+
+  /*visual plugs*/
+  oscP5.plug(this,"sizemod","/visual/sizemod");
+  oscP5.plug(this,"sweight","/visual/strokeweight");
+  oscP5.plug(this,"hue","/visual/hue");
+  oscP5.plug(this,"saturation","/visual/saturation");
+  oscP5.plug(this,"brightness","/visual/brightness");
+  oscP5.plug(this,"alpha","/visual/alpha");
+  oscP5.plug(this,"visualsize","/visual/visualsize");
+  oscP5.plug(this,"backgroundalpha","/visual/bgalpha");
+
+
+  oscP5.plug(this,"location","/mech/xy");
+
+  /*buttons*/
+  oscP5.plug(this,"startandstop","/radio/startstop/1/1");
+   oscP5.plug(this,"savescreenin","/radio/savescreen/1/1");
+  oscP5.plug(this,"killtheclient","/visual/bgalpha");
+
   reverb = new Synth("fx_rev_gverb");
-  reverb.set("wet", 1.0f);
+  reverb.set("wet", 0.0f);
   reverb.set("reverbtime", 1.5f);
   reverb.set("damp", 0.7f);
   reverb.addToTail();
@@ -86,6 +146,13 @@ public void setup() {
   startAudio();
 }
 
+public void mousePressed(){
+  if(localstartedval==0.0f){localstartedval=1.0f;}
+  else {
+  localstartedval=0.0f;    
+  }
+}
+
 /*some global variables*/
 
 int x = 1;
@@ -97,12 +164,12 @@ float[] numbers = new float[numberOfPoints];
 public void draw() {
   
   frameRate(25);
-  if(localmode==1){
+  if(localmode==1.0f){
     background(0);
   }
-  if (localstartedval==1)
+  if (localstartedval==1.0f)
     {
-      if (localforexport==0){
+      if (localforexport==0.0f){
       fill(0, 0, 0, localbackgroundalpha);
       rect(0,0, width,height);}
       flock.run();
@@ -114,15 +181,16 @@ public void draw() {
           }
     }
 
-  if (localsavescreen==1){
+  if (localsavescreen==1.0f){
     saveFrame(); 
   }
-  reverb.set("damp", 0.7f*localreverbvar);
-  if (localexitval==1){
+
+    if (localexitval==1){
     exit();
   }
-}
 
+  reverb.set("wet", 0+localreverbvar);
+}
 /*function to start the audio*/
 
 public void startAudio(){
@@ -143,6 +211,60 @@ public void exit()
     }
     super.exit();
 }
+
+public void oscEvent(OscMessage theOscMessage) {
+  /* print the address pattern and the typetag of the received OscMessage */
+  print("### received an osc message.");
+  print(" addrpattern: "+theOscMessage.addrPattern());
+  println(" typetag: "+theOscMessage.typetag());
+
+/* render modes */
+  if(theOscMessage.addrPattern().equals("/visual/rendermode/1/1")) { 
+    rainbow();
+  }
+  if(theOscMessage.addrPattern().equals("/visual/rendermode/2/1")) { 
+    circle();
+  }
+  if(theOscMessage.addrPattern().equals("/visual/rendermode/3/1")) { 
+    bezier();
+  }
+  if(theOscMessage.addrPattern().equals("/visual/rendermode/4/1")) { 
+    entropic();
+  }
+
+/* sound modes */
+  if(theOscMessage.addrPattern().equals("/sound/soundmode/1/1")) { 
+    wind();//3
+      }
+  if(theOscMessage.addrPattern().equals("/sound/soundmode/2/1")) { 
+    windMONO();//2
+  }
+  if(theOscMessage.addrPattern().equals("/sound/soundmode/3/1")) { 
+    some();//1
+  }
+  if(theOscMessage.addrPattern().equals("/sound/soundmode/4/1")) { 
+    someINVERT();//0
+  }
+
+/*lockbg radio*/
+  if(theOscMessage.addrPattern().equals("/visual/lockbg")) { 
+    forexport();
+  }
+
+  if(theOscMessage.addrPattern().equals("/visual/killtheclient")) { 
+    killtheclient();
+  }
+
+/*savescreen*/
+
+  if(theOscMessage.addrPattern().equals("/visual/save")) { 
+    savescreenin();
+  }
+
+}
+
+
+
 
 
 
@@ -191,24 +313,18 @@ SynthDef(\fx_rev_gverb, { |inbus = 0, outbus = 0, wet = 0.5, fade = 1.0, roomsiz
 }).store;
 
 */
-/**
- * oscP5plug by andreas schlegel
- * example shows how to use the plug service with oscP5.
- * the concept of the plug service is, that you can
- * register methods in your sketch to which incoming 
- * osc messages will be forwareded automatically without 
- * having to parse them in the oscEvent method.
- * that a look at the example below to get an understanding
- * of how plug works.
- * oscP5 website at http://www.sojamo.de/oscP5
- */
+/*
+OSC,
+The facilitator of communication.
+*/
 
 OscP5 oscP5;
 NetAddress myRemoteLocation;
 
-public void test( int freqModulationin
-  ,int reverbin
-  ,int neighbordistin
+public void test( 
+  float freqModulationin
+  ,float reverbin
+  ,float neighbordistin
   ,float sizemodin
   ,float sweightin
   ,float panmodin
@@ -218,17 +334,17 @@ public void test( int freqModulationin
   ,float maxspeedin
   ,float separationdistancein
   ,float soundmodevarin
-  ,int visualsizein
-  ,int huein
-  ,int saturationin
-  ,int brightnessin
-  ,int alphain
+  ,float visualsizein
+  ,float huein
+  ,float saturationin
+  ,float brightnessin
+  ,float alphain
   ,float modein
-  ,int startedvalin
-  ,int exitvalin
+  ,float startedvalin
+  ,float exitvalin
   ,float forexportin
-  ,int backgroundalphain
-  ,int savescreenin) {
+  ,float backgroundalphain
+  ,float savescreenin) {
 
    localfreqModulation = freqModulationin;
    localreverbvar = reverbin;
@@ -255,6 +371,161 @@ public void test( int freqModulationin
    localsavescreen = savescreenin;
 }
 
+
+/*all the values*/
+
+public void neighbordist(float neighbordistin){
+  localneighbordist=neighbordistin;
+  println(localneighbordist);
+}
+public void freq(float freqModulationin){
+  localfreqModulation=freqModulationin;
+  println(localfreqModulation);
+}
+public void reverb(float reverbin){
+  localreverbvar=reverbin;
+  println(reverbin);
+}
+public void sizemod(float sizemodin){
+  localsizemod=sizemodin;
+  println(sizemodin);
+}
+public void sweight(float sweightin){
+  localsweight=sweightin;
+  println(sweightin);
+}
+public void panmod(float panmodin){
+  localpanmod=panmodin;
+  println(panmodin);
+}
+public void maxspeed(float maxspeedin){
+  localmaxspeed=maxspeedin;
+  println(maxspeedin);
+}
+public void separationforce(float separationforcein){
+  localseparationforce=separationforcein;
+  println(separationforcein);
+}
+public void alignmentforce(float alignmentforcein){
+  localalignmentforce=alignmentforcein;
+  println(alignmentforcein);
+}
+public void cohesionforce(float cohesionforcein){
+  localcohesionforce=cohesionforcein;
+  println(cohesionforcein);
+}
+public void separationdistance(float separationdistancein){
+  localseparationdistance=separationdistancein;
+  println(separationdistancein);
+}
+public void attraction(float attractionin){
+  localxyweight=attractionin;
+  println(attractionin);
+}
+public void visualsize(float visualsizein){
+  localvisualsize=visualsizein;
+  println(visualsizein);
+}
+public void hue(float huein){
+  localhue=huein;
+  println(huein);
+}
+public void saturation(float saturationin){
+  localsaturation=saturationin;
+  println(saturationin);
+}
+public void brightness(float brightnessin){
+  localbrightness=brightnessin;
+  println(brightnessin);
+}
+public void alpha(float alphain){
+  localalpha=alphain;
+  println(alphain);
+}
+public void backgroundalpha(float backgroundalphain){
+  localbackgroundalpha=backgroundalphain;
+  println(backgroundalphain);
+}
+
+/*Radio buttons*/
+
+public void rainbow(){
+  localmode=3.0f;
+  println("mode: " +localmode);
+}
+public void circle(){
+  localmode=2.0f;
+  println("mode: " +localmode);
+}
+public void bezier(){
+  localmode=1.0f;
+  println("mode: " +localmode);
+}
+public void entropic(){
+  localmode=0.0f;
+  println("mode: " +localmode);
+}
+//soundmodes
+
+public void wind(){
+  localsoundmodevar=3.0f;
+  println("mode: " +localsoundmodevar);
+}
+public void windMONO(){
+  localsoundmodevar=2.0f;
+  println("mode: " +localsoundmodevar);
+}
+public void some(){
+  localsoundmodevar=1.0f;
+  println("mode: " +localsoundmodevar);
+}
+public void someINVERT(){
+  localsoundmodevar=0.0f;
+  println("mode: " +localsoundmodevar);
+}
+
+
+public void startandstop(float startedvalin){
+  localstartedval=startedvalin;
+  println("localstartedvalin");
+}
+public void killtheclient(){
+  if(localexitval==0.0f){
+    localexitval=1.0f;
+  }
+  else {
+  localexitval=0.0f; 
+  }
+}
+public void forexport(){
+  if (localforexport==0.0f)
+  {
+    localforexport=1.0f;
+  }
+  else
+  {
+    localforexport=0.0f;
+  }
+  
+}
+
+public void savescreenin(){
+  if (localsavescreen==0.0f){
+    localsavescreen=1.0f;
+  }
+  else {
+    localsavescreen=0.0f;
+    }
+}
+
+/*x & y */
+
+public void location(float ylocationin, float xlocationin){
+  println("x variable="+xlocationin);
+  localxlocation=xlocationin*width;
+  println("y variable="+ylocationin);
+  localylocation=height-ylocationin*height;
+}
 /*The boid class. watch out this ones a banger!*/
 
 class Boid {
@@ -265,7 +536,7 @@ class Boid {
   float diameter;
   float maxforce; //maximum steering force
   float maxspeed; //max speed
-  float localseparationdistance = 25.0f;
+  //float localseparationdistance = 40.0;
 
   Boid(float x, float y) {
     acceleration = new PVector(0, 0);
@@ -425,17 +696,15 @@ public void borders() {
   //Separation
   //method checks for nearby boids and steers away
   public PVector separate(ArrayList<Boid> boids) {
-    float desiredseparation = localseparationdistance;
+   float desiredseparation = localseparationdistance;
     PVector steer = new PVector(0, 0, 0);
     int count = 0;
     //for every boid in the system chech if its too close
     for (Boid other : boids) {
-      float d = PVector.dist(location, other.location);
+      float d = PVector.dist(location, other.location); diameter = d/localsizemod;
       //if the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
-      diameter = d/localsizemod;
       if ((d > 0) && (d < desiredseparation)) {
         //calculate vector pointing away from neighbor
-
         PVector diff = PVector.sub(location, other.location);
         diff.normalize();
         diff.div(d); //weight by distance.
@@ -531,7 +800,7 @@ class Flock {
   }
 }
   static public void main(String[] passedArgs) {
-    String[] appletArgs = new String[] { "FlockingEntropicSynthOSCclient" };
+    String[] appletArgs = new String[] { "--full-screen", "--bgcolor=#666666", "--stop-color=#cccccc", "SingingFishbirdsClient" };
     if (passedArgs != null) {
       PApplet.main(concat(appletArgs, passedArgs));
     } else {
