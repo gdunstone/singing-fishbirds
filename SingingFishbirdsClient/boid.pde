@@ -36,14 +36,17 @@ class Boid {
     PVector sep = separate(boids); //separation
     PVector ali = align(boids); //alignment
     PVector coh = cohesion(boids); //cohesion
+    PVector xy = xy(boids);
     //arbitrarily weight these forces
     sep.mult(localseparationforce);
     ali.mult(localalignmentforce);
     coh.mult(localcohesionforce);
+        xy.mult(localxyweight);
     //add the force vectors to accel
     applyForce(sep);
     applyForce(ali);
     applyForce(coh);
+        applyForce(xy);
   }
   void update() {
     //update velocity
@@ -151,7 +154,23 @@ void render() {
   //wraparound 
 void borders() {
    
+/* use these for later when you want to implement wraparound :-)
+   if (location.x > width) {
+      location.x = 0;//random(-1,-2);
+    } 
+    else if (location.x < 0) {
+      location.x = width;//random(1,2);
+    } // X
+
+       if (location.y > height) {
+      location.y = 0;//random(-1,-2);
+    } 
+    else if (location.y < 0) {
+      location.y = height;//random(1,2);
+    } // X
    
+*/
+
    if (location.x > width) {
       velocity.x = -velocity.x;
     } 
@@ -164,6 +183,7 @@ void borders() {
     } else if (location.y < 0) {
       velocity.y = -velocity.y;
     }// Y
+    
  }
   //Separation
   //method checks for nearby boids and steers away
@@ -247,4 +267,35 @@ void borders() {
       return new PVector(0, 0);
     }
   }
+
+  //attraction/revulsion
+    PVector xy (ArrayList<Boid> boids) {
+    float neighbordist = 70+localneighbordist;
+    PVector sum = new PVector(localxlocation, localylocation);
+    int count = 0;
+    for (Boid other : boids) {
+      float d= PVector.dist(location, other.location);
+      if ((d > 0) && (d < neighbordist)) {
+        sum = sum; //add location
+        count++;
+      }
+      
+    }
+      /*if (location.x> mouseX-40 && location.x<mouseX+40)
+      {
+        if (location.y>mouseY-40&& location.y<mouseY+40)
+        {velocity.sub(velocity);
+         velocity.normalize();
+        }
+      }*/
+    if (count > 0) {
+      
+      return seek(sum); //steer towards the location
+    } 
+    else {
+      return new PVector(0, 0);
+    }
+  }
+
+  
 }

@@ -1,0 +1,3 @@
+ -Xms64m -Xmx1000m
+SingingFishbirdsClient
+SingingFishbirdsClient.jar,core.jar,jogl-all.jar,gluegen-rt.jar,jogl-all-natives-windows-amd64.jar,gluegen-rt-natives-windows-amd64.jar,supercollider.jar,oscP5.jar

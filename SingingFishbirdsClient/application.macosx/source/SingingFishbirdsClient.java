@@ -540,7 +540,7 @@ class Flock {
   }
 }
   static public void main(String[] passedArgs) {
-    String[] appletArgs = new String[] { "SingingFishbirdsClient" };
+    String[] appletArgs = new String[] { "--full-screen", "--bgcolor=#666666", "--stop-color=#cccccc", "SingingFishbirdsClient" };
     if (passedArgs != null) {
       PApplet.main(concat(appletArgs, passedArgs));
     } else {

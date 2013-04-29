@@ -80,9 +80,9 @@ RadioButton r;
 
 ArrayList<NetAddress> addresslist;
   int w, h;
-  int freqModulation = 0;
-  int reverb = 0;
-  int neighbordist = 0;
+  float freqModulation = 0;
+  float reverb = 0;
+  float neighbordist = 0;
   float sizemod = 0;
   float sweight = 0;
   float panmod = 1;
@@ -92,17 +92,17 @@ ArrayList<NetAddress> addresslist;
   float maxspeed = 0.0f;
   float separationdistance = 40.0f;
   float soundmodevar = 0;
-  int visualsize = 0;
-  int hue = 0;
-  int saturation = 0;
-  int brightness = 0;
-  int alpha = 0;
+  float visualsize = 0;
+  float hue = 0;
+  float saturation = 0;
+  float brightness = 0;
+  float alpha = 0;
   float mode = 0;
-  int exitval = 0;
-  int startedval = 0;
+  float exitval = 0;
+  float startedval = 0;
   float forexport = 0.0f;
-  int backgroundalpha = 10;
-  int savescreen = 0;
+  float backgroundalpha = 10;
+  float savescreen = 0;
   String address;
 
 public void setup() {
@@ -470,20 +470,18 @@ public void message() {
   myMessage.add(savescreen);
 
 
-  //send the message to the 
+  //send the message to the client
   for(int i=0; i<addresslist.size(); i++){
     oscP5.send(myMessage, addresslist.get(i));
   }
 }
 
-public void midiMessage(MidiMessage message) { // You can also use midiMessage(MidiMessage message, String bus_name)
+public void midiMessage(MidiMessage message) {
 
   println("");
   for(int i = 0;i < message.getMessage().length;i++) {
     println("Param "+(i)+": "+(int)(message.getMessage()[i] & 0xFF));
   }
-  //inputNumber = message.getMessage()[1];
-  //inputValue = message.getMessage()[2];
 
   println("inputNumber: "+message.getMessage()[1]);
   println("inputValue"+message.getMessage()[message.getMessage().length-1]);
@@ -549,13 +547,13 @@ public void midiMessage(MidiMessage message) { // You can also use midiMessage(M
     startedval=1;
   }
   else if (inputNumber==1) {
-    exitNow();
-  }
-  else if (inputNumber==2) {
     export();
   }
-  else if (inputNumber==3) {
+  else if (inputNumber==2) {
     saveScreen();
+  }
+  else if (inputNumber==3) {
+    //reserved for later
   }
 
 
@@ -588,7 +586,7 @@ public void midiMessage(MidiMessage message) { // You can also use midiMessage(M
   
 }
   static public void main(String[] passedArgs) {
-    String[] appletArgs = new String[] { "SingingFishbirdsControl" };
+    String[] appletArgs = new String[] { "--full-screen", "--bgcolor=#666666", "--stop-color=#cccccc", "SingingFishbirdsControl" };
     if (passedArgs != null) {
       PApplet.main(concat(appletArgs, passedArgs));
     } else {
