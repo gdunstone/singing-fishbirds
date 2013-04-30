@@ -73,34 +73,35 @@ LIKE THE LICENSE IS ANGRY AND SHOUTING AT YOU?!?
   float localmode = 3.0f;
   float localstartedval=0.0f;
   float localexitval = 0;
-  float localbackgroundalpha = 10;
+
   float localsavescreen = 0;
   float attractionval = 0.0f;
   float localforexport = 0.0f;
-  float localxyweight1 = 0.0f;
-  float localxyweight2 = 0.0f;
+  float localmousex = 0.0f;
+  float localmousey = 0.0f;
+  float localxyweight = 0.0f;
   float localxlocation = 0.0f;
   float localylocation = 0.0f;
-  float localxlocation1 = 0.0f;
-  float localylocation1 = 0.0f;
-  float localxlocation2 = 0.0f;
-  float localylocation2 = 0.0f;
   float toggleattractionval = 0.0f;
   float xlocationreturn = 0.0f;
   float ylocationreturn = 0.0f;
+
+  float localbackgroundalpha = 10;
+  float localbgsaturation = 0;
+  float localbgbrightness = 0;
+  float localbghue = 0;
+  String address;
 float number = 22;
 Synth reverb;
 Flock flock;
 
 public void setup() {
-  size(1350,750);
+  size(300,800);
   colorMode(HSB);
   oscP5 = new OscP5(this,12000);
   oschost = new OscP5(this,10000);
-  hostlocation = new NetAddress("169.254.170.253",10000);
+  hostlocation = new NetAddress("192.168.1.106",10000);
   myRemoteLocation = new NetAddress("127.0.0.1",12000);
-
-  oscP5.plug(this,"test","/test");
 
   /*sound plugs*/
   oscP5.plug(this,"freq","/sound/Freq");
@@ -114,8 +115,8 @@ public void setup() {
   oscP5.plug(this,"separationdistance","/mech/sepdistance");
   oscP5.plug(this,"cohesionforce","/mech/cohesion");
   oscP5.plug(this,"neighbordist","/mech/neighbor");
-  oscP5.plug(this,"attraction1","/mech/attraction1");
-oscP5.plug(this,"attraction2","/mech/attraction2");
+  oscP5.plug(this,"attraction","/mech/attraction");
+
   /*visual plugs*/
   oscP5.plug(this,"sizemod","/visual/sizemod");
   oscP5.plug(this,"sweight","/visual/strokeweight");
@@ -125,11 +126,10 @@ oscP5.plug(this,"attraction2","/mech/attraction2");
   oscP5.plug(this,"alpha","/visual/alpha");
   oscP5.plug(this,"visualsize","/visual/visualsize");
   oscP5.plug(this,"backgroundalpha","/visual/bgalpha");
-
-
-  //oscP5.plug(this,"location","/mech/xy");
-  oscP5.plug(this,"location1","/mech/multixy/1");
-  oscP5.plug(this,"location2","/mech/multixy/2");
+  oscP5.plug(this,"backgroundbrightness","/visual/bgbrightness");
+  oscP5.plug(this,"backgroundsaturation","/visual/bgsaturation");
+  oscP5.plug(this,"backgroundhue","/visual/bghue");
+  oscP5.plug(this,"location","/mech/xy");
 
   /*buttons*/
   oscP5.plug(this,"startandstop","/radio/startstop/1/1");
@@ -163,14 +163,12 @@ float[] numbers = new float[numberOfPoints];
 public void draw() {
 
   frameRate(25);
-  if(localmode==1.0f){
-    background(0);
-  }
   if (localstartedval==1.0f)
     {
       if (localforexport==0.0f){
-      fill(0, 0, 0, localbackgroundalpha);
-      rect(0,0, width,height);}
+        fill(localbghue, localbgsaturation,localbgbrightness, localbackgroundalpha);
+        rect(0,0, width,height);
+      }
       flock.run();
     }
   else 
@@ -217,11 +215,12 @@ public void exit()
 }
 
 public void oscEvent(OscMessage theOscMessage) {
+  address = theOscMessage.netAddress().address();
   /* print the address pattern and the typetag of the received OscMessage */
   print("### received an osc message.");
   print(" addrpattern: "+theOscMessage.addrPattern());
   println(" typetag: "+theOscMessage.typetag());
-  //println("first: "+theOscMessage.get(0).floatValue());
+  println("recieved from: "+address);
 /* render modes */
   if(theOscMessage.addrPattern().equals("/visual/rendermode/1/1")) { 
     rainbow();
@@ -290,8 +289,8 @@ public void returnMessage() {
   OscMessage sepdistancereturn = new OscMessage("/mech/sepdistance");
   OscMessage cohesionreturn = new OscMessage("/mech/cohesion");
   OscMessage neighborreturn = new OscMessage("/mech/neighbor");
-  OscMessage attraction1return = new OscMessage("/mech/attraction1");
-OscMessage attraction2return = new OscMessage("/mech/attraction2");
+  OscMessage attractionreturn = new OscMessage("/mech/attraction");
+
   /*visual plugs*/
   OscMessage sizemodreturn = new OscMessage("/visual/sizemod");
   OscMessage strokeweightreturn = new OscMessage("/visual/strokeweight");
@@ -301,10 +300,13 @@ OscMessage attraction2return = new OscMessage("/mech/attraction2");
   OscMessage alphareturn = new OscMessage("/visual/alpha");
   OscMessage visualsizereturn = new OscMessage("/visual/visualsize");
   OscMessage bgalphareturn = new OscMessage("/visual/bgalpha");
+  OscMessage bgsaturationreturn = new OscMessage("/visual/bgsaturation");
+  OscMessage bghuereturn = new OscMessage("/visual/bghue");
+  OscMessage bgbrightnessreturn = new OscMessage("/visual/bgbrightness");
   OscMessage forexportreturn = new OscMessage("/visual/lockbg");
 
   OscMessage xyreturn = new OscMessage("/mech/xy");
-
+ 
   /*buttons*/
   OscMessage startstopreturn = new OscMessage("/radio/startstop/1/1");
   startstopreturn.add(localstartedval);
@@ -328,13 +330,15 @@ OscMessage attraction2return = new OscMessage("/mech/attraction2");
   saturationreturn.add(localsaturation);
   brightnessreturn.add(localbrightness);
   alphareturn.add(localalpha);
-  attraction1return.add(localxyweight1);
-  attraction2return.add(localxyweight2);
+  attractionreturn.add(localxyweight);
 
   //myMessage.add(mode);
   //sou.add(soundmodevar);
 
   bgalphareturn.add(localbackgroundalpha);
+  bgsaturationreturn.add(localbgsaturation);
+  bghuereturn.add(localbghue);
+  bgbrightnessreturn.add(localbgbrightness);
   forexportreturn.add(localforexport);
   xyreturn.add(ylocationreturn);
   xyreturn.add(xlocationreturn);
@@ -358,10 +362,12 @@ OscMessage attraction2return = new OscMessage("/mech/attraction2");
     oschost.send(alphareturn, hostlocation);
     oschost.send(bgalphareturn, hostlocation);
     oschost.send(startstopreturn, hostlocation);
-    oschost.send(attraction1return,hostlocation);
-        oschost.send(attraction2return,hostlocation);
+    oschost.send(attractionreturn,hostlocation);
     oschost.send(forexportreturn,hostlocation);
-    //oschost.send(xyreturn,hostlocation);
+    oschost.send(xyreturn,hostlocation);
+    oschost.send(bgsaturationreturn, hostlocation);
+    oschost.send(bgbrightnessreturn, hostlocation);
+    oschost.send(bghuereturn, hostlocation);    
 
     if (localmode==0.0f){
 
@@ -436,57 +442,6 @@ OscP5 oschost;
 NetAddress myRemoteLocation;
 NetAddress hostlocation;
 
-public void test( 
-  float freqModulationin
-  ,float reverbin
-  ,float neighbordistin
-  ,float sizemodin
-  ,float sweightin
-  ,float panmodin
-  ,float separationforcein
-  ,float alignmentforcein
-  ,float cohesionforcein
-  ,float maxspeedin
-  ,float separationdistancein
-  ,float soundmodevarin
-  ,float visualsizein
-  ,float huein
-  ,float saturationin
-  ,float brightnessin
-  ,float alphain
-  ,float modein
-  ,float startedvalin
-  ,float exitvalin
-  ,float forexportin
-  ,float backgroundalphain
-  ,float savescreenin) {
-
-   localfreqModulation = freqModulationin;
-   localreverbvar = reverbin;
-   localneighbordist = neighbordistin;
-   localsizemod = sizemodin;
-   localsweight = sweightin;
-   localpanmod = panmodin;
-   localseparationforce = separationforcein;
-   localalignmentforce = alignmentforcein;
-   localcohesionforce = cohesionforcein;
-   localmaxspeed = maxspeedin;
-   localseparationdistance = separationdistancein;
-   localsoundmodevar = soundmodevarin;
-   localvisualsize = visualsizein;
-   localhue = huein;
-   localsaturation = saturationin;
-   localbrightness = brightnessin;
-   localalpha = alphain;
-   localmode = modein;
-   localstartedval = startedvalin;
-   localexitval = exitvalin;
-   localforexport = forexportin;
-   localbackgroundalpha = backgroundalphain;
-   localsavescreen = savescreenin;
-}
-
-
 /*all the values*/
 
 public void neighbordist(float neighbordistin){
@@ -533,12 +488,8 @@ public void separationdistance(float separationdistancein){
   localseparationdistance=separationdistancein;
   println(separationdistancein);
 }
-public void attraction1(float attractionin){
-  localxyweight1=attractionin;
-  println(attractionin);
-}
-public void attraction2(float attractionin){
-  localxyweight2=attractionin;
+public void attraction(float attractionin){
+  localxyweight=attractionin;
   println(attractionin);
 }
 public void visualsize(float visualsizein){
@@ -561,9 +512,17 @@ public void alpha(float alphain){
   localalpha=alphain;
   println(alphain);
 }
-public void backgroundalpha(float backgroundalphain){
-  localbackgroundalpha=backgroundalphain;
-  println(backgroundalphain);
+public void backgroundalpha(float in){
+  localbackgroundalpha=in;
+}
+public void backgroundhue(float in){
+  localbghue=in;
+}
+public void backgroundsaturation(float in){
+  localbgsaturation=in;
+}
+public void backgroundbrightness(float in){
+  localbgbrightness=in;
 }
 
 /*Radio buttons*/
@@ -639,24 +598,16 @@ public void savescreenin(){
 
 /*x & y */
 
-public void location1(float ylocationin, float xlocationin){
-  println("xlocation1="+localxlocation1);
-  localxlocation1=xlocationin*width;
-  println("ylocation1="+localylocation1);
-  localylocation1=height-ylocationin*height;
-  returnMessage();
-}
-public void location2(float ylocationin,float xlocationin){
-    println("xlocation2="+localxlocation2);
-  localxlocation2=xlocationin*width;
-  println("ylocation2="+localylocation2);
-  localylocation2=height-ylocationin*height;
+public void location(float ylocationin, float xlocationin){
+  println("x variable="+xlocationin);
+  localxlocation=xlocationin*width;
+  println("y variable="+ylocationin);
+  localylocation=height-ylocationin*height;
   returnMessage();
 }
 
 public void toggleAttraction(){
-  localxyweight1=0.0f; 
-  localxyweight2=0.0f;
+  localxyweight=0.0f; 
   returnMessage();   
 }
 /*The boid class. watch out this ones a banger!*/
@@ -697,20 +648,17 @@ class Boid {
     PVector sep = separate(boids); //separation
     PVector ali = align(boids); //alignment
     PVector coh = cohesion(boids); //cohesion
-    PVector xy1 = xy1(boids);
-    PVector xy2 = xy2(boids);
+    PVector xy = xy(boids);
     //arbitrarily weight these forces
     sep.mult(localseparationforce);
     ali.mult(localalignmentforce);
     coh.mult(localcohesionforce);
-    xy1.mult(localxyweight1);
-    xy2.mult(localxyweight2);
+    xy.mult(localxyweight);
     //add the force vectors to accel
     applyForce(sep);
     applyForce(ali);
     applyForce(coh);
-    applyForce(xy1);
-    applyForce(xy2);
+    applyForce(xy);
   }
   public void update() {
     //update velocity
@@ -776,7 +724,7 @@ public void render() {
         for (int i = 0; i<numberOfPoints; i++){
         numbers[i]=random(2,diameter+localvisualsize);
         }
-        stroke(255);
+        stroke(localhue, localsaturation, localbrightness, localalpha);
         strokeWeight(localsweight);
         
         beginShape();
@@ -794,7 +742,7 @@ public void render() {
     else if(localmode ==1.0f)
     {
       float theta = velocity.heading2D() + radians(120);
-      stroke(255);
+      stroke(localhue, localsaturation, localbrightness, localalpha);
       strokeWeight(localsweight);
       rotate(theta);
       bezier(0, 0, random(0,localvisualsize), random(0,-localvisualsize), random(0,-localvisualsize), random(0,localvisualsize), 0, 0);
@@ -933,9 +881,9 @@ public void borders() {
   }
 
   //attraction/revulsion
-    public PVector xy1 (ArrayList<Boid> boids) {
+    public PVector xy (ArrayList<Boid> boids) {
     float neighbordist = 70+localneighbordist;
-    PVector sum = new PVector(localxlocation1, localylocation1);
+    PVector sum = new PVector(localxlocation, localylocation);
     int count = 0;
     for (Boid other : boids) {
       float d= PVector.dist(location, other.location);
@@ -960,37 +908,6 @@ public void borders() {
       return new PVector(0, 0);
     }
   }
-
-    public PVector xy2 (ArrayList<Boid> boids) {
-    float neighbordist = 70+localneighbordist;
-    PVector sum = new PVector(localxlocation2, localylocation2);
-    int count = 0;
-    for (Boid other : boids) {
-      float d= PVector.dist(location, other.location);
-      if ((d > 0) && (d < neighbordist)) {
-        sum = sum; //add location
-        count++;
-      }
-      
-    }
-      /*if (location.x> mouseX-40 && location.x<mouseX+40)
-      {
-        if (location.y>mouseY-40&& location.y<mouseY+40)
-        {velocity.sub(velocity);
-         velocity.normalize();
-        }
-      }*/
-    if (count > 0) {
-      
-      return seek(sum); //steer towards the location
-    } 
-    else {
-      return new PVector(0, 0);
-    }
-  }
-
-
-  
 }
 // The FLOCK, a list of Boid objects
 
@@ -1016,7 +933,7 @@ class Flock {
   }
 }
   static public void main(String[] passedArgs) {
-    String[] appletArgs = new String[] { "--full-screen", "--bgcolor=#666666", "--stop-color=#cccccc", "SingingFishbirdsClient" };
+    String[] appletArgs = new String[] { "SingingFishbirdsClient" };
     if (passedArgs != null) {
       PApplet.main(concat(appletArgs, passedArgs));
     } else {

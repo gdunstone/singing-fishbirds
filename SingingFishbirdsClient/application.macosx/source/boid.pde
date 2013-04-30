@@ -8,7 +8,7 @@ class Boid {
   float diameter;
   float maxforce; //maximum steering force
   float maxspeed; //max speed
-  float localseparationdistance = 25.0;
+  //float localseparationdistance = 40.0;
 
   Boid(float x, float y) {
     acceleration = new PVector(0, 0);
@@ -36,14 +36,17 @@ class Boid {
     PVector sep = separate(boids); //separation
     PVector ali = align(boids); //alignment
     PVector coh = cohesion(boids); //cohesion
+    PVector xy = xy(boids);
     //arbitrarily weight these forces
     sep.mult(localseparationforce);
     ali.mult(localalignmentforce);
     coh.mult(localcohesionforce);
+    xy.mult(localxyweight);
     //add the force vectors to accel
     applyForce(sep);
     applyForce(ali);
     applyForce(coh);
+    applyForce(xy);
   }
   void update() {
     //update velocity
@@ -109,7 +112,7 @@ void render() {
         for (int i = 0; i<numberOfPoints; i++){
         numbers[i]=random(2,diameter+localvisualsize);
         }
-        stroke(255);
+        stroke(localhue, localsaturation, localbrightness, localalpha);
         strokeWeight(localsweight);
         
         beginShape();
@@ -127,7 +130,7 @@ void render() {
     else if(localmode ==1.0)
     {
       float theta = velocity.heading2D() + radians(120);
-      stroke(255);
+      stroke(localhue, localsaturation, localbrightness, localalpha);
       strokeWeight(localsweight);
       rotate(theta);
       bezier(0, 0, random(0,localvisualsize), random(0,-localvisualsize), random(0,-localvisualsize), random(0,localvisualsize), 0, 0);
@@ -151,7 +154,23 @@ void render() {
   //wraparound 
 void borders() {
    
+/* use these for later when you want to implement wraparound :-)
+   if (location.x > width) {
+      location.x = 0;//random(-1,-2);
+    } 
+    else if (location.x < 0) {
+      location.x = width;//random(1,2);
+    } // X
+
+       if (location.y > height) {
+      location.y = 0;//random(-1,-2);
+    } 
+    else if (location.y < 0) {
+      location.y = height;//random(1,2);
+    } // X
    
+*/
+
    if (location.x > width) {
       velocity.x = -velocity.x;
     } 
@@ -164,21 +183,20 @@ void borders() {
     } else if (location.y < 0) {
       velocity.y = -velocity.y;
     }// Y
+    
  }
   //Separation
   //method checks for nearby boids and steers away
   PVector separate(ArrayList<Boid> boids) {
-    float desiredseparation = localseparationdistance;
+   float desiredseparation = localseparationdistance;
     PVector steer = new PVector(0, 0, 0);
     int count = 0;
     //for every boid in the system chech if its too close
     for (Boid other : boids) {
-      float d = PVector.dist(location, other.location);
+      float d = PVector.dist(location, other.location); diameter = d/localsizemod;
       //if the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
-      diameter = d/localsizemod;
       if ((d > 0) && (d < desiredseparation)) {
         //calculate vector pointing away from neighbor
-
         PVector diff = PVector.sub(location, other.location);
         diff.normalize();
         diff.div(d); //weight by distance.
@@ -243,6 +261,35 @@ void borders() {
     }
     if (count > 0) {
       sum.div(count);
+      return seek(sum); //steer towards the location
+    } 
+    else {
+      return new PVector(0, 0);
+    }
+  }
+
+  //attraction/revulsion
+    PVector xy (ArrayList<Boid> boids) {
+    float neighbordist = 70+localneighbordist;
+    PVector sum = new PVector(localxlocation, localylocation);
+    int count = 0;
+    for (Boid other : boids) {
+      float d= PVector.dist(location, other.location);
+      if ((d > 0) && (d < neighbordist)) {
+        sum = sum; //add location
+        count++;
+      }
+      
+    }
+      /*if (location.x> mouseX-40 && location.x<mouseX+40)
+      {
+        if (location.y>mouseY-40&& location.y<mouseY+40)
+        {velocity.sub(velocity);
+         velocity.normalize();
+        }
+      }*/
+    if (count > 0) {
+      
       return seek(sum); //steer towards the location
     } 
     else {

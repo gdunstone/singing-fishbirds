@@ -8,57 +8,6 @@ OscP5 oschost;
 NetAddress myRemoteLocation;
 NetAddress hostlocation;
 
-public void test( 
-  float freqModulationin
-  ,float reverbin
-  ,float neighbordistin
-  ,float sizemodin
-  ,float sweightin
-  ,float panmodin
-  ,float separationforcein
-  ,float alignmentforcein
-  ,float cohesionforcein
-  ,float maxspeedin
-  ,float separationdistancein
-  ,float soundmodevarin
-  ,float visualsizein
-  ,float huein
-  ,float saturationin
-  ,float brightnessin
-  ,float alphain
-  ,float modein
-  ,float startedvalin
-  ,float exitvalin
-  ,float forexportin
-  ,float backgroundalphain
-  ,float savescreenin) {
-
-   localfreqModulation = freqModulationin;
-   localreverbvar = reverbin;
-   localneighbordist = neighbordistin;
-   localsizemod = sizemodin;
-   localsweight = sweightin;
-   localpanmod = panmodin;
-   localseparationforce = separationforcein;
-   localalignmentforce = alignmentforcein;
-   localcohesionforce = cohesionforcein;
-   localmaxspeed = maxspeedin;
-   localseparationdistance = separationdistancein;
-   localsoundmodevar = soundmodevarin;
-   localvisualsize = visualsizein;
-   localhue = huein;
-   localsaturation = saturationin;
-   localbrightness = brightnessin;
-   localalpha = alphain;
-   localmode = modein;
-   localstartedval = startedvalin;
-   localexitval = exitvalin;
-   localforexport = forexportin;
-   localbackgroundalpha = backgroundalphain;
-   localsavescreen = savescreenin;
-}
-
-
 /*all the values*/
 
 public void neighbordist(float neighbordistin){
@@ -105,12 +54,8 @@ public void separationdistance(float separationdistancein){
   localseparationdistance=separationdistancein;
   println(separationdistancein);
 }
-public void attraction1(float attractionin){
-  localxyweight1=attractionin;
-  println(attractionin);
-}
-public void attraction2(float attractionin){
-  localxyweight2=attractionin;
+public void attraction(float attractionin){
+  localxyweight=attractionin;
   println(attractionin);
 }
 public void visualsize(float visualsizein){
@@ -133,9 +78,17 @@ public void alpha(float alphain){
   localalpha=alphain;
   println(alphain);
 }
-public void backgroundalpha(float backgroundalphain){
-  localbackgroundalpha=backgroundalphain;
-  println(backgroundalphain);
+public void backgroundalpha(float in){
+  localbackgroundalpha=in;
+}
+public void backgroundhue(float in){
+  localbghue=in;
+}
+public void backgroundsaturation(float in){
+  localbgsaturation=in;
+}
+public void backgroundbrightness(float in){
+  localbgbrightness=in;
 }
 
 /*Radio buttons*/
@@ -211,23 +164,15 @@ public void savescreenin(){
 
 /*x & y */
 
-public void location1(float ylocationin, float xlocationin){
-  println("xlocation1="+localxlocation1);
-  localxlocation1=xlocationin*width;
-  println("ylocation1="+localylocation1);
-  localylocation1=height-ylocationin*height;
-  returnMessage();
-}
-public void location2(float ylocationin,float xlocationin){
-    println("xlocation2="+localxlocation2);
-  localxlocation2=xlocationin*width;
-  println("ylocation2="+localylocation2);
-  localylocation2=height-ylocationin*height;
+public void location(float ylocationin, float xlocationin){
+  println("x variable="+xlocationin);
+  localxlocation=xlocationin*width;
+  println("y variable="+ylocationin);
+  localylocation=height-ylocationin*height;
   returnMessage();
 }
 
 public void toggleAttraction(){
-  localxyweight1=0.0; 
-  localxyweight2=0.0;
+  localxyweight=0.0; 
   returnMessage();   
 }

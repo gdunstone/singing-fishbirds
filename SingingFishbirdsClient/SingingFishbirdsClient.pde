@@ -53,34 +53,35 @@ import netP5.*;
   float localmode = 3.0;
   float localstartedval=0.0;
   float localexitval = 0;
-  float localbackgroundalpha = 10;
+
   float localsavescreen = 0;
   float attractionval = 0.0;
   float localforexport = 0.0;
-  float localxyweight1 = 0.0;
-  float localxyweight2 = 0.0;
+  float localmousex = 0.0;
+  float localmousey = 0.0;
+  float localxyweight = 0.0;
   float localxlocation = 0.0;
   float localylocation = 0.0;
-  float localxlocation1 = 0.0;
-  float localylocation1 = 0.0;
-  float localxlocation2 = 0.0;
-  float localylocation2 = 0.0;
   float toggleattractionval = 0.0;
   float xlocationreturn = 0.0;
   float ylocationreturn = 0.0;
+
+  float localbackgroundalpha = 10;
+  float localbgsaturation = 0;
+  float localbgbrightness = 0;
+  float localbghue = 0;
+  String address;
 float number = 22;
 Synth reverb;
 Flock flock;
 
 void setup() {
-  size(1350,750);
+  size(400,800);
   colorMode(HSB);
   oscP5 = new OscP5(this,12000);
   oschost = new OscP5(this,10000);
-  hostlocation = new NetAddress("169.254.170.253",10000);
+  hostlocation = new NetAddress("192.168.1.106",10000);
   myRemoteLocation = new NetAddress("127.0.0.1",12000);
-
-  oscP5.plug(this,"test","/test");
 
   /*sound plugs*/
   oscP5.plug(this,"freq","/sound/Freq");
@@ -94,8 +95,8 @@ void setup() {
   oscP5.plug(this,"separationdistance","/mech/sepdistance");
   oscP5.plug(this,"cohesionforce","/mech/cohesion");
   oscP5.plug(this,"neighbordist","/mech/neighbor");
-  oscP5.plug(this,"attraction1","/mech/attraction1");
-oscP5.plug(this,"attraction2","/mech/attraction2");
+  oscP5.plug(this,"attraction","/mech/attraction");
+
   /*visual plugs*/
   oscP5.plug(this,"sizemod","/visual/sizemod");
   oscP5.plug(this,"sweight","/visual/strokeweight");
@@ -105,11 +106,10 @@ oscP5.plug(this,"attraction2","/mech/attraction2");
   oscP5.plug(this,"alpha","/visual/alpha");
   oscP5.plug(this,"visualsize","/visual/visualsize");
   oscP5.plug(this,"backgroundalpha","/visual/bgalpha");
-
-
-  //oscP5.plug(this,"location","/mech/xy");
-  oscP5.plug(this,"location1","/mech/multixy/1");
-  oscP5.plug(this,"location2","/mech/multixy/2");
+  oscP5.plug(this,"backgroundbrightness","/visual/bgbrightness");
+  oscP5.plug(this,"backgroundsaturation","/visual/bgsaturation");
+  oscP5.plug(this,"backgroundhue","/visual/bghue");
+  oscP5.plug(this,"location","/mech/xy");
 
   /*buttons*/
   oscP5.plug(this,"startandstop","/radio/startstop/1/1");
@@ -143,14 +143,12 @@ float[] numbers = new float[numberOfPoints];
 void draw() {
 
   frameRate(25);
-  if(localmode==1.0){
-    background(0);
-  }
   if (localstartedval==1.0)
     {
       if (localforexport==0.0){
-      fill(0, 0, 0, localbackgroundalpha);
-      rect(0,0, width,height);}
+        fill(localbghue, localbgsaturation,localbgbrightness, localbackgroundalpha);
+        rect(0,0, width,height);
+      }
       flock.run();
     }
   else 
@@ -197,11 +195,12 @@ void exit()
 }
 
 void oscEvent(OscMessage theOscMessage) {
+  address = theOscMessage.netAddress().address();
   /* print the address pattern and the typetag of the received OscMessage */
   print("### received an osc message.");
   print(" addrpattern: "+theOscMessage.addrPattern());
   println(" typetag: "+theOscMessage.typetag());
-  //println("first: "+theOscMessage.get(0).floatValue());
+  println("recieved from: "+address);
 /* render modes */
   if(theOscMessage.addrPattern().equals("/visual/rendermode/1/1")) { 
     rainbow();
@@ -270,8 +269,8 @@ void returnMessage() {
   OscMessage sepdistancereturn = new OscMessage("/mech/sepdistance");
   OscMessage cohesionreturn = new OscMessage("/mech/cohesion");
   OscMessage neighborreturn = new OscMessage("/mech/neighbor");
-  OscMessage attraction1return = new OscMessage("/mech/attraction1");
-OscMessage attraction2return = new OscMessage("/mech/attraction2");
+  OscMessage attractionreturn = new OscMessage("/mech/attraction");
+
   /*visual plugs*/
   OscMessage sizemodreturn = new OscMessage("/visual/sizemod");
   OscMessage strokeweightreturn = new OscMessage("/visual/strokeweight");
@@ -281,10 +280,13 @@ OscMessage attraction2return = new OscMessage("/mech/attraction2");
   OscMessage alphareturn = new OscMessage("/visual/alpha");
   OscMessage visualsizereturn = new OscMessage("/visual/visualsize");
   OscMessage bgalphareturn = new OscMessage("/visual/bgalpha");
+  OscMessage bgsaturationreturn = new OscMessage("/visual/bgsaturation");
+  OscMessage bghuereturn = new OscMessage("/visual/bghue");
+  OscMessage bgbrightnessreturn = new OscMessage("/visual/bgbrightness");
   OscMessage forexportreturn = new OscMessage("/visual/lockbg");
 
   OscMessage xyreturn = new OscMessage("/mech/xy");
-
+ 
   /*buttons*/
   OscMessage startstopreturn = new OscMessage("/radio/startstop/1/1");
   startstopreturn.add(localstartedval);
@@ -308,13 +310,15 @@ OscMessage attraction2return = new OscMessage("/mech/attraction2");
   saturationreturn.add(localsaturation);
   brightnessreturn.add(localbrightness);
   alphareturn.add(localalpha);
-  attraction1return.add(localxyweight1);
-  attraction2return.add(localxyweight2);
+  attractionreturn.add(localxyweight);
 
   //myMessage.add(mode);
   //sou.add(soundmodevar);
 
   bgalphareturn.add(localbackgroundalpha);
+  bgsaturationreturn.add(localbgsaturation);
+  bghuereturn.add(localbghue);
+  bgbrightnessreturn.add(localbgbrightness);
   forexportreturn.add(localforexport);
   xyreturn.add(ylocationreturn);
   xyreturn.add(xlocationreturn);
@@ -338,10 +342,12 @@ OscMessage attraction2return = new OscMessage("/mech/attraction2");
     oschost.send(alphareturn, hostlocation);
     oschost.send(bgalphareturn, hostlocation);
     oschost.send(startstopreturn, hostlocation);
-    oschost.send(attraction1return,hostlocation);
-        oschost.send(attraction2return,hostlocation);
+    oschost.send(attractionreturn,hostlocation);
     oschost.send(forexportreturn,hostlocation);
-    //oschost.send(xyreturn,hostlocation);
+    oschost.send(xyreturn,hostlocation);
+    oschost.send(bgsaturationreturn, hostlocation);
+    oschost.send(bgbrightnessreturn, hostlocation);
+    oschost.send(bghuereturn, hostlocation);    
 
     if (localmode==0.0){
 
