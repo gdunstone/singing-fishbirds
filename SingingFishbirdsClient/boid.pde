@@ -109,13 +109,12 @@ void render() {
     translate(location.x, location.y);
 
     /*RENDERMODE! */
-
-    if(localmode == 0.0)
+if(localmode == 0.0)
     {
         for (int i = 0; i<numberOfPoints; i++){
         numbers[i]=random(2,diameter+localvisualsize);
         }
-        stroke(255);
+        stroke(localhue, localsaturation, localbrightness, localalpha);
         strokeWeight(localsweight);
         
         beginShape();
@@ -133,7 +132,7 @@ void render() {
     else if(localmode ==1.0)
     {
       float theta = velocity.heading2D() + radians(120);
-      stroke(255);
+      stroke(localhue, localsaturation, localbrightness, localalpha);
       strokeWeight(localsweight);
       rotate(theta);
       bezier(0, 0, random(0,localvisualsize), random(0,-localvisualsize), random(0,-localvisualsize), random(0,localvisualsize), 0, 0);
