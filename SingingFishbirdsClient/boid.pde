@@ -42,8 +42,8 @@ class Boid {
     sep.mult(localseparationforce);
     ali.mult(localalignmentforce);
     coh.mult(localcohesionforce);
-    xy1.mult(localxyweight);
-    xy2.mult(localxyweight);
+    xy1.mult(localxyweight1);
+    xy2.mult(localxyweight2);
     //add the force vectors to accel
     applyForce(sep);
     applyForce(ali);

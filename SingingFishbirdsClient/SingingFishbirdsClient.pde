@@ -57,9 +57,8 @@ import netP5.*;
   float localsavescreen = 0;
   float attractionval = 0.0;
   float localforexport = 0.0;
-  float localmousex = 0.0;
-  float localmousey = 0.0;
-  float localxyweight = 0.0;
+  float localxyweight1 = 0.0;
+  float localxyweight2 = 0.0;
   float localxlocation = 0.0;
   float localylocation = 0.0;
   float localxlocation1 = 0.0;
@@ -95,8 +94,8 @@ void setup() {
   oscP5.plug(this,"separationdistance","/mech/sepdistance");
   oscP5.plug(this,"cohesionforce","/mech/cohesion");
   oscP5.plug(this,"neighbordist","/mech/neighbor");
-  oscP5.plug(this,"attraction","/mech/attraction");
-
+  oscP5.plug(this,"attraction1","/mech/attraction1");
+oscP5.plug(this,"attraction2","/mech/attraction2");
   /*visual plugs*/
   oscP5.plug(this,"sizemod","/visual/sizemod");
   oscP5.plug(this,"sweight","/visual/strokeweight");
@@ -271,8 +270,8 @@ void returnMessage() {
   OscMessage sepdistancereturn = new OscMessage("/mech/sepdistance");
   OscMessage cohesionreturn = new OscMessage("/mech/cohesion");
   OscMessage neighborreturn = new OscMessage("/mech/neighbor");
-  OscMessage attractionreturn = new OscMessage("/mech/attraction");
-
+  OscMessage attraction1return = new OscMessage("/mech/attraction1");
+OscMessage attraction2return = new OscMessage("/mech/attraction2");
   /*visual plugs*/
   OscMessage sizemodreturn = new OscMessage("/visual/sizemod");
   OscMessage strokeweightreturn = new OscMessage("/visual/strokeweight");
@@ -309,7 +308,8 @@ void returnMessage() {
   saturationreturn.add(localsaturation);
   brightnessreturn.add(localbrightness);
   alphareturn.add(localalpha);
-  attractionreturn.add(localxyweight);
+  attraction1return.add(localxyweight1);
+  attraction2return.add(localxyweight2);
 
   //myMessage.add(mode);
   //sou.add(soundmodevar);
@@ -338,7 +338,8 @@ void returnMessage() {
     oschost.send(alphareturn, hostlocation);
     oschost.send(bgalphareturn, hostlocation);
     oschost.send(startstopreturn, hostlocation);
-    oschost.send(attractionreturn,hostlocation);
+    oschost.send(attraction1return,hostlocation);
+        oschost.send(attraction2return,hostlocation);
     oschost.send(forexportreturn,hostlocation);
     //oschost.send(xyreturn,hostlocation);
 

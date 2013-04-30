@@ -105,8 +105,12 @@ public void separationdistance(float separationdistancein){
   localseparationdistance=separationdistancein;
   println(separationdistancein);
 }
-public void attraction(float attractionin){
-  localxyweight=attractionin;
+public void attraction1(float attractionin){
+  localxyweight1=attractionin;
+  println(attractionin);
+}
+public void attraction2(float attractionin){
+  localxyweight2=attractionin;
   println(attractionin);
 }
 public void visualsize(float visualsizein){
@@ -223,6 +227,7 @@ public void location2(float ylocationin,float xlocationin){
 }
 
 public void toggleAttraction(){
-  localxyweight=0.0; 
+  localxyweight1=0.0; 
+  localxyweight2=0.0;
   returnMessage();   
 }

@@ -77,9 +77,8 @@ LIKE THE LICENSE IS ANGRY AND SHOUTING AT YOU?!?
   float localsavescreen = 0;
   float attractionval = 0.0f;
   float localforexport = 0.0f;
-  float localmousex = 0.0f;
-  float localmousey = 0.0f;
-  float localxyweight = 0.0f;
+  float localxyweight1 = 0.0f;
+  float localxyweight2 = 0.0f;
   float localxlocation = 0.0f;
   float localylocation = 0.0f;
   float localxlocation1 = 0.0f;
@@ -115,8 +114,8 @@ public void setup() {
   oscP5.plug(this,"separationdistance","/mech/sepdistance");
   oscP5.plug(this,"cohesionforce","/mech/cohesion");
   oscP5.plug(this,"neighbordist","/mech/neighbor");
-  oscP5.plug(this,"attraction","/mech/attraction");
-
+  oscP5.plug(this,"attraction1","/mech/attraction1");
+oscP5.plug(this,"attraction2","/mech/attraction2");
   /*visual plugs*/
   oscP5.plug(this,"sizemod","/visual/sizemod");
   oscP5.plug(this,"sweight","/visual/strokeweight");
@@ -291,8 +290,8 @@ public void returnMessage() {
   OscMessage sepdistancereturn = new OscMessage("/mech/sepdistance");
   OscMessage cohesionreturn = new OscMessage("/mech/cohesion");
   OscMessage neighborreturn = new OscMessage("/mech/neighbor");
-  OscMessage attractionreturn = new OscMessage("/mech/attraction");
-
+  OscMessage attraction1return = new OscMessage("/mech/attraction1");
+OscMessage attraction2return = new OscMessage("/mech/attraction2");
   /*visual plugs*/
   OscMessage sizemodreturn = new OscMessage("/visual/sizemod");
   OscMessage strokeweightreturn = new OscMessage("/visual/strokeweight");
@@ -329,7 +328,8 @@ public void returnMessage() {
   saturationreturn.add(localsaturation);
   brightnessreturn.add(localbrightness);
   alphareturn.add(localalpha);
-  attractionreturn.add(localxyweight);
+  attraction1return.add(localxyweight1);
+  attraction2return.add(localxyweight2);
 
   //myMessage.add(mode);
   //sou.add(soundmodevar);
@@ -358,7 +358,8 @@ public void returnMessage() {
     oschost.send(alphareturn, hostlocation);
     oschost.send(bgalphareturn, hostlocation);
     oschost.send(startstopreturn, hostlocation);
-    oschost.send(attractionreturn,hostlocation);
+    oschost.send(attraction1return,hostlocation);
+        oschost.send(attraction2return,hostlocation);
     oschost.send(forexportreturn,hostlocation);
     //oschost.send(xyreturn,hostlocation);
 
@@ -532,8 +533,12 @@ public void separationdistance(float separationdistancein){
   localseparationdistance=separationdistancein;
   println(separationdistancein);
 }
-public void attraction(float attractionin){
-  localxyweight=attractionin;
+public void attraction1(float attractionin){
+  localxyweight1=attractionin;
+  println(attractionin);
+}
+public void attraction2(float attractionin){
+  localxyweight2=attractionin;
   println(attractionin);
 }
 public void visualsize(float visualsizein){
@@ -650,7 +655,8 @@ public void location2(float ylocationin,float xlocationin){
 }
 
 public void toggleAttraction(){
-  localxyweight=0.0f; 
+  localxyweight1=0.0f; 
+  localxyweight2=0.0f;
   returnMessage();   
 }
 /*The boid class. watch out this ones a banger!*/
@@ -697,8 +703,8 @@ class Boid {
     sep.mult(localseparationforce);
     ali.mult(localalignmentforce);
     coh.mult(localcohesionforce);
-    xy1.mult(localxyweight);
-    xy2.mult(localxyweight);
+    xy1.mult(localxyweight1);
+    xy2.mult(localxyweight2);
     //add the force vectors to accel
     applyForce(sep);
     applyForce(ali);
