@@ -82,6 +82,10 @@ LIKE THE LICENSE IS ANGRY AND SHOUTING AT YOU?!?
   float localxyweight = 0.0f;
   float localxlocation = 0.0f;
   float localylocation = 0.0f;
+  float localxlocation1 = 0.0f;
+  float localylocation1 = 0.0f;
+  float localxlocation2 = 0.0f;
+  float localylocation2 = 0.0f;
   float toggleattractionval = 0.0f;
   float xlocationreturn = 0.0f;
   float ylocationreturn = 0.0f;
@@ -124,7 +128,9 @@ public void setup() {
   oscP5.plug(this,"backgroundalpha","/visual/bgalpha");
 
 
-  oscP5.plug(this,"location","/mech/xy");
+  //oscP5.plug(this,"location","/mech/xy");
+  oscP5.plug(this,"location1","/mech/multixy/1");
+  oscP5.plug(this,"location2","/mech/multixy/2");
 
   /*buttons*/
   oscP5.plug(this,"startandstop","/radio/startstop/1/1");
@@ -216,7 +222,7 @@ public void oscEvent(OscMessage theOscMessage) {
   print("### received an osc message.");
   print(" addrpattern: "+theOscMessage.addrPattern());
   println(" typetag: "+theOscMessage.typetag());
-
+  //println("first: "+theOscMessage.get(0).floatValue());
 /* render modes */
   if(theOscMessage.addrPattern().equals("/visual/rendermode/1/1")) { 
     rainbow();
@@ -269,12 +275,10 @@ public void oscEvent(OscMessage theOscMessage) {
 
 
 public void returnMessage() {
-  /* createan osc message with address pattern /test */
+  /* create an osc message with address pattern /test */
   //OscMessage myMessage = new OscMessage("/test");
   xlocationreturn = localxlocation/width;
   ylocationreturn = 1-localylocation/height;
-  println(xlocationreturn);
-  println(ylocationreturn);
   /*sound plugs*/
   OscMessage freqreturn = new OscMessage("/sound/Freq");
   OscMessage reverbreturn = new OscMessage("/sound/reverb");
@@ -298,7 +302,7 @@ public void returnMessage() {
   OscMessage alphareturn = new OscMessage("/visual/alpha");
   OscMessage visualsizereturn = new OscMessage("/visual/visualsize");
   OscMessage bgalphareturn = new OscMessage("/visual/bgalpha");
-
+  OscMessage forexportreturn = new OscMessage("/visual/lockbg");
 
   OscMessage xyreturn = new OscMessage("/mech/xy");
 
@@ -331,6 +335,7 @@ public void returnMessage() {
   //sou.add(soundmodevar);
 
   bgalphareturn.add(localbackgroundalpha);
+  forexportreturn.add(localforexport);
   xyreturn.add(ylocationreturn);
   xyreturn.add(xlocationreturn);
 
@@ -354,7 +359,8 @@ public void returnMessage() {
     oschost.send(bgalphareturn, hostlocation);
     oschost.send(startstopreturn, hostlocation);
     oschost.send(attractionreturn,hostlocation);
-    oschost.send(xyreturn,hostlocation);
+    oschost.send(forexportreturn,hostlocation);
+    //oschost.send(xyreturn,hostlocation);
 
     if (localmode==0.0f){
 
@@ -628,11 +634,18 @@ public void savescreenin(){
 
 /*x & y */
 
-public void location(float ylocationin, float xlocationin){
-  println("x variable="+xlocationin);
-  localxlocation=xlocationin*width;
-  println("y variable="+ylocationin);
-  localylocation=height-ylocationin*height;
+public void location1(float ylocationin, float xlocationin){
+  println("xlocation1="+localxlocation1);
+  localxlocation1=xlocationin*width;
+  println("ylocation1="+localylocation1);
+  localylocation1=height-ylocationin*height;
+  returnMessage();
+}
+public void location2(float ylocationin,float xlocationin){
+    println("xlocation2="+localxlocation2);
+  localxlocation2=xlocationin*width;
+  println("ylocation2="+localylocation2);
+  localylocation2=height-ylocationin*height;
   returnMessage();
 }
 
@@ -678,17 +691,20 @@ class Boid {
     PVector sep = separate(boids); //separation
     PVector ali = align(boids); //alignment
     PVector coh = cohesion(boids); //cohesion
-    PVector xy = xy(boids);
+    PVector xy1 = xy1(boids);
+    PVector xy2 = xy2(boids);
     //arbitrarily weight these forces
     sep.mult(localseparationforce);
     ali.mult(localalignmentforce);
     coh.mult(localcohesionforce);
-    xy.mult(localxyweight);
+    xy1.mult(localxyweight);
+    xy2.mult(localxyweight);
     //add the force vectors to accel
     applyForce(sep);
     applyForce(ali);
     applyForce(coh);
-    applyForce(xy);
+    applyForce(xy1);
+    applyForce(xy2);
   }
   public void update() {
     //update velocity
@@ -911,9 +927,9 @@ public void borders() {
   }
 
   //attraction/revulsion
-    public PVector xy (ArrayList<Boid> boids) {
+    public PVector xy1 (ArrayList<Boid> boids) {
     float neighbordist = 70+localneighbordist;
-    PVector sum = new PVector(localxlocation, localylocation);
+    PVector sum = new PVector(localxlocation1, localylocation1);
     int count = 0;
     for (Boid other : boids) {
       float d= PVector.dist(location, other.location);
@@ -938,6 +954,35 @@ public void borders() {
       return new PVector(0, 0);
     }
   }
+
+    public PVector xy2 (ArrayList<Boid> boids) {
+    float neighbordist = 70+localneighbordist;
+    PVector sum = new PVector(localxlocation2, localylocation2);
+    int count = 0;
+    for (Boid other : boids) {
+      float d= PVector.dist(location, other.location);
+      if ((d > 0) && (d < neighbordist)) {
+        sum = sum; //add location
+        count++;
+      }
+      
+    }
+      /*if (location.x> mouseX-40 && location.x<mouseX+40)
+      {
+        if (location.y>mouseY-40&& location.y<mouseY+40)
+        {velocity.sub(velocity);
+         velocity.normalize();
+        }
+      }*/
+    if (count > 0) {
+      
+      return seek(sum); //steer towards the location
+    } 
+    else {
+      return new PVector(0, 0);
+    }
+  }
+
 
   
 }

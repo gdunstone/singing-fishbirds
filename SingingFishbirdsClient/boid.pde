@@ -36,17 +36,20 @@ class Boid {
     PVector sep = separate(boids); //separation
     PVector ali = align(boids); //alignment
     PVector coh = cohesion(boids); //cohesion
-    PVector xy = xy(boids);
+    PVector xy1 = xy1(boids);
+    PVector xy2 = xy2(boids);
     //arbitrarily weight these forces
     sep.mult(localseparationforce);
     ali.mult(localalignmentforce);
     coh.mult(localcohesionforce);
-    xy.mult(localxyweight);
+    xy1.mult(localxyweight);
+    xy2.mult(localxyweight);
     //add the force vectors to accel
     applyForce(sep);
     applyForce(ali);
     applyForce(coh);
-    applyForce(xy);
+    applyForce(xy1);
+    applyForce(xy2);
   }
   void update() {
     //update velocity
@@ -269,9 +272,9 @@ void borders() {
   }
 
   //attraction/revulsion
-    PVector xy (ArrayList<Boid> boids) {
+    PVector xy1 (ArrayList<Boid> boids) {
     float neighbordist = 70+localneighbordist;
-    PVector sum = new PVector(localxlocation, localylocation);
+    PVector sum = new PVector(localxlocation1, localylocation1);
     int count = 0;
     for (Boid other : boids) {
       float d= PVector.dist(location, other.location);
@@ -296,6 +299,35 @@ void borders() {
       return new PVector(0, 0);
     }
   }
+
+    PVector xy2 (ArrayList<Boid> boids) {
+    float neighbordist = 70+localneighbordist;
+    PVector sum = new PVector(localxlocation2, localylocation2);
+    int count = 0;
+    for (Boid other : boids) {
+      float d= PVector.dist(location, other.location);
+      if ((d > 0) && (d < neighbordist)) {
+        sum = sum; //add location
+        count++;
+      }
+      
+    }
+      /*if (location.x> mouseX-40 && location.x<mouseX+40)
+      {
+        if (location.y>mouseY-40&& location.y<mouseY+40)
+        {velocity.sub(velocity);
+         velocity.normalize();
+        }
+      }*/
+    if (count > 0) {
+      
+      return seek(sum); //steer towards the location
+    } 
+    else {
+      return new PVector(0, 0);
+    }
+  }
+
 
   
 }

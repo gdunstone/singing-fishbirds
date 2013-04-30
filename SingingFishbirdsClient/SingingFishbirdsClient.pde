@@ -62,6 +62,10 @@ import netP5.*;
   float localxyweight = 0.0;
   float localxlocation = 0.0;
   float localylocation = 0.0;
+  float localxlocation1 = 0.0;
+  float localylocation1 = 0.0;
+  float localxlocation2 = 0.0;
+  float localylocation2 = 0.0;
   float toggleattractionval = 0.0;
   float xlocationreturn = 0.0;
   float ylocationreturn = 0.0;
@@ -104,7 +108,9 @@ void setup() {
   oscP5.plug(this,"backgroundalpha","/visual/bgalpha");
 
 
-  oscP5.plug(this,"location","/mech/xy");
+  //oscP5.plug(this,"location","/mech/xy");
+  oscP5.plug(this,"location1","/mech/multixy/1");
+  oscP5.plug(this,"location2","/mech/multixy/2");
 
   /*buttons*/
   oscP5.plug(this,"startandstop","/radio/startstop/1/1");
@@ -196,7 +202,7 @@ void oscEvent(OscMessage theOscMessage) {
   print("### received an osc message.");
   print(" addrpattern: "+theOscMessage.addrPattern());
   println(" typetag: "+theOscMessage.typetag());
-
+  //println("first: "+theOscMessage.get(0).floatValue());
 /* render modes */
   if(theOscMessage.addrPattern().equals("/visual/rendermode/1/1")) { 
     rainbow();
@@ -249,12 +255,10 @@ void oscEvent(OscMessage theOscMessage) {
 
 
 void returnMessage() {
-  /* createan osc message with address pattern /test */
+  /* create an osc message with address pattern /test */
   //OscMessage myMessage = new OscMessage("/test");
   xlocationreturn = localxlocation/width;
   ylocationreturn = 1-localylocation/height;
-  println(xlocationreturn);
-  println(ylocationreturn);
   /*sound plugs*/
   OscMessage freqreturn = new OscMessage("/sound/Freq");
   OscMessage reverbreturn = new OscMessage("/sound/reverb");
@@ -278,7 +282,7 @@ void returnMessage() {
   OscMessage alphareturn = new OscMessage("/visual/alpha");
   OscMessage visualsizereturn = new OscMessage("/visual/visualsize");
   OscMessage bgalphareturn = new OscMessage("/visual/bgalpha");
-
+  OscMessage forexportreturn = new OscMessage("/visual/lockbg");
 
   OscMessage xyreturn = new OscMessage("/mech/xy");
 
@@ -311,6 +315,7 @@ void returnMessage() {
   //sou.add(soundmodevar);
 
   bgalphareturn.add(localbackgroundalpha);
+  forexportreturn.add(localforexport);
   xyreturn.add(ylocationreturn);
   xyreturn.add(xlocationreturn);
 
@@ -334,7 +339,8 @@ void returnMessage() {
     oschost.send(bgalphareturn, hostlocation);
     oschost.send(startstopreturn, hostlocation);
     oschost.send(attractionreturn,hostlocation);
-    oschost.send(xyreturn,hostlocation);
+    oschost.send(forexportreturn,hostlocation);
+    //oschost.send(xyreturn,hostlocation);
 
     if (localmode==0.0){
 

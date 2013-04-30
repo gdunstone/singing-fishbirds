@@ -207,11 +207,18 @@ public void savescreenin(){
 
 /*x & y */
 
-public void location(float ylocationin, float xlocationin){
-  println("x variable="+xlocationin);
-  localxlocation=xlocationin*width;
-  println("y variable="+ylocationin);
-  localylocation=height-ylocationin*height;
+public void location1(float ylocationin, float xlocationin){
+  println("xlocation1="+localxlocation1);
+  localxlocation1=xlocationin*width;
+  println("ylocation1="+localylocation1);
+  localylocation1=height-ylocationin*height;
+  returnMessage();
+}
+public void location2(float ylocationin,float xlocationin){
+    println("xlocation2="+localxlocation2);
+  localxlocation2=xlocationin*width;
+  println("ylocation2="+localylocation2);
+  localylocation2=height-ylocationin*height;
   returnMessage();
 }
 
