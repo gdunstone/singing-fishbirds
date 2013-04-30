@@ -53,55 +53,71 @@ LIKE THE LICENSE IS ANGRY AND SHOUTING AT YOU?!?
 
 
 
-  float localfreqModulation = 200;
-  float localreverbvar = 1;
-  float localneighbordist = 1000.0f;
-  float localsizemod = 10;
-  float localsweight = 1;
-  float localpanmod = 1;
-  float localseparationforce = 1.5f;
-  float localalignmentforce = 1.0f;
-  float localcohesionforce = 1.4f;
-  float localmaxspeed = 2;
-  float localseparationdistance = 40.0f;
-  float localsoundmodevar = 3;
-  float localvisualsize = 2;
-  float localhue = 80;
-  float localsaturation = 255;
-  float localbrightness = 255;
-  float localalpha = 100;
-  float localmode = 3.0f;
-  float localstartedval=0.0f;
-  float localexitval = 0;
 
-  float localsavescreen = 0;
-  float attractionval = 0.0f;
-  float localforexport = 0.0f;
-  float localmousex = 0.0f;
-  float localmousey = 0.0f;
-  float localxyweight = 0.0f;
-  float localxlocation = 0.0f;
-  float localylocation = 0.0f;
-  float toggleattractionval = 0.0f;
-  float xlocationreturn = 0.0f;
-  float ylocationreturn = 0.0f;
+/* all the variables: */
 
-  float localbackgroundalpha = 10;
-  float localbgsaturation = 0;
-  float localbgbrightness = 0;
-  float localbghue = 0;
-  String address;
+float localfreqModulation = 200;
+float localreverbvar = 1;
+float localneighbordist = 1000.0f;
+float localsizemod = 10;
+float localsweight = 1;
+float localpanmod = 1;
+float localseparationforce = 1.5f;
+float localalignmentforce = 1.0f;
+float localcohesionforce = 1.4f;
+float localmaxspeed = 2;
+float localseparationdistance = 40.0f;
+float localsoundmodevar = 3;
+float localvisualsize = 2;
+float localhue = 80;
+float localsaturation = 255;
+float localbrightness = 255;
+float localalpha = 100;
+float localmode = 3.0f;
+
+float localstartedval=0.0f;
+float localexitval = 0;
+float attractionval = 0.0f;
+float localforexport = 0.0f;
+
+float localxyweight = 0.0f;
+float localxlocation = 0.0f;
+float localylocation = 0.0f;
+float toggleattractionval = 0.0f;
+float xlocationreturn = 0.0f;
+float ylocationreturn = 0.0f;
+
+float localbackgroundalpha = 10;
+float localbgsaturation = 0;
+float localbgbrightness = 0;
+float localbghue = 0;
+//this is only used for debugging.
+String address;
+
+/*this variable changes the number of boids and synths created,
+Supercollider can only handle a certain amount of input though,
+and oscP5 seems to take up a large amount of stuff...*/
 float number = 22;
+
+OscP5 oscP5;
+OscP5 oschost;
+
+NetAddress hostlocation;
+
 Synth reverb;
 Flock flock;
 
 public void setup() {
-  size(300,800);
+  size(1300,800);
+  frameRate(120);
   colorMode(HSB);
+
+  /*setup oscp5 for send and recieve*/
   oscP5 = new OscP5(this,12000);
-  oschost = new OscP5(this,10000);
+  oschost = new OscP5(this,9000);
+
+  //change this to the ip of the host
   hostlocation = new NetAddress("192.168.1.106",10000);
-  myRemoteLocation = new NetAddress("127.0.0.1",12000);
 
   /*sound plugs*/
   oscP5.plug(this,"freq","/sound/Freq");
@@ -133,8 +149,8 @@ public void setup() {
 
   /*buttons*/
   oscP5.plug(this,"startandstop","/radio/startstop/1/1");
-   //oscP5.plug(this,"toggleattraction","/mech/toggleattraction");
   oscP5.plug(this,"killtheclient","/visual/bgalpha");
+  oscP5.plug(this,"forexport","/visual/lockbg");
 
   reverb = new Synth("fx_rev_gverb");
   reverb.set("wet", 0.0f);
@@ -143,12 +159,12 @@ public void setup() {
   reverb.addToTail();
   
   flock = new Flock();
+
   //add initial
   for (int i=0; i<number; i++) {
-    //flock.addBoid(new Boid(random(0,100)),random(0,100));
     flock.addBoid(new Boid(random(width),random(height)));
   }
-returnMessage();
+  returnMessage();
   startAudio();
 }
 
@@ -161,28 +177,25 @@ float[] numbers = new float[numberOfPoints];
 /*DRAW*/
 
 public void draw() {
-
-  frameRate(25);
   if (localstartedval==1.0f)
     {
+      flock.run();
+
       if (localforexport==0.0f){
         fill(localbghue, localbgsaturation,localbgbrightness, localbackgroundalpha);
         rect(0,0, width,height);
       }
-      flock.run();
     }
-  else 
-    {background(0);
+
+  else //turn off synths and make bg 0
+    {
+      background(0);
       for (int i=0; i<flock.synths.size(); i++) {
             flock.synths.get(i).set("freq", 0);
           }
     }
 
-  if (localsavescreen==1.0f){
-    saveFrame(); 
-  }
-
- if (localexitval==1){
+  if (localexitval==1){
     exit();
   }
 
@@ -213,26 +226,165 @@ public void exit()
     }
     super.exit();
 }
+/*
+OSC,
+The facilitator of communication.
+*/
+
+/*all the functions*/
+
+public void neighbordist(float neighbordistin){
+  localneighbordist=neighbordistin;
+}
+public void freq(float freqModulationin){
+  localfreqModulation=freqModulationin;
+}
+public void reverb(float reverbin){
+  localreverbvar=reverbin;
+}
+public void sizemod(float sizemodin){
+  localsizemod=sizemodin;
+}
+public void sweight(float sweightin){
+  localsweight=sweightin;
+}
+public void panmod(float panmodin){
+  localpanmod=panmodin;
+}
+public void maxspeed(float maxspeedin){
+  localmaxspeed=maxspeedin;
+}
+public void separationforce(float separationforcein){
+  localseparationforce=separationforcein;
+}
+public void alignmentforce(float alignmentforcein){
+  localalignmentforce=alignmentforcein;
+}
+public void cohesionforce(float cohesionforcein){
+  localcohesionforce=cohesionforcein;
+}
+public void separationdistance(float separationdistancein){
+  localseparationdistance=separationdistancein;
+}
+public void attraction(float attractionin){
+  localxyweight=attractionin;
+}
+public void visualsize(float visualsizein){
+  localvisualsize=visualsizein;
+}
+public void hue(float huein){
+  localhue=huein;
+}
+public void saturation(float saturationin){
+  localsaturation=saturationin;
+}
+public void brightness(float brightnessin){
+  localbrightness=brightnessin;
+}
+public void alpha(float alphain){
+  localalpha=alphain;
+}
+public void backgroundalpha(float in){
+  localbackgroundalpha=in;
+}
+public void backgroundhue(float in){
+  localbghue=in;
+}
+public void backgroundsaturation(float in){
+  localbgsaturation=in;
+}
+public void backgroundbrightness(float in){
+  localbgbrightness=in;
+}
+
+/*Radio buttons*/
+
+public void rainbow(){
+  localmode=3.0f;
+}
+public void circle(){
+  localmode=2.0f;
+}
+public void bezier(){
+  localmode=1.0f;
+}
+public void entropic(){
+  localmode=0.0f;
+}
+
+//soundmodes
+
+public void wind(){
+  localsoundmodevar=3.0f;
+}
+public void windMONO(){
+  localsoundmodevar=2.0f;
+}
+public void some(){
+  localsoundmodevar=1.0f;
+}
+public void someINVERT(){
+  localsoundmodevar=0.0f;
+}
+
+
+public void startandstop(float startedvalin){
+  localstartedval=startedvalin;
+}
+
+public void killtheclient(){
+  if(localexitval==0.0f){
+    localexitval=1.0f;
+  }
+}
+
+public void forexport(float in){
+  localforexport=in;
+}
+
+public void savescreenin(){
+    saveFrame();
+}
+
+/*x & y */
+
+public void location(float ylocationin, float xlocationin){
+  localxlocation=xlocationin*width;
+  localylocation=height-ylocationin*height;
+}
+
+public void toggleAttraction(){
+  localxyweight=0.0f;
+}
+
+
+/*oscEvent, for stuff that i couldnt oscP5.plug()*/
 
 public void oscEvent(OscMessage theOscMessage) {
+  /* Debugging stuff */
+  /*
   address = theOscMessage.netAddress().address();
-  /* print the address pattern and the typetag of the received OscMessage */
   print("### received an osc message.");
   print(" addrpattern: "+theOscMessage.addrPattern());
   println(" typetag: "+theOscMessage.typetag());
   println("recieved from: "+address);
+  */
+
+  //send the current state back to the device
+  returnMessage();
+
 /* render modes */
   if(theOscMessage.addrPattern().equals("/visual/rendermode/1/1")) { 
-    rainbow();
+    rainbow();//3
   }
   if(theOscMessage.addrPattern().equals("/visual/rendermode/2/1")) { 
-    circle();
+    circle();//2
   }
   if(theOscMessage.addrPattern().equals("/visual/rendermode/3/1")) { 
-    bezier();
+    bezier();//1
   }
   if(theOscMessage.addrPattern().equals("/visual/rendermode/4/1")) { 
-    entropic();
+    entropic();//0
   }
 
 /* sound modes */
@@ -249,11 +401,6 @@ public void oscEvent(OscMessage theOscMessage) {
     someINVERT();//0
   }
 
-/*lockbg radio*/
-  if(theOscMessage.addrPattern().equals("/visual/lockbg")) { 
-    forexport();
-  }
-
   if(theOscMessage.addrPattern().equals("/visual/killtheclient")) { 
     killtheclient();
   }
@@ -268,15 +415,14 @@ public void oscEvent(OscMessage theOscMessage) {
   if(theOscMessage.addrPattern().equals("/mech/toggleattraction")) { 
     toggleAttraction();
   }
-
 }
 
+/*return messages, this is required to get current states on TouchOSC*/
 
 public void returnMessage() {
-  /* create an osc message with address pattern /test */
-  //OscMessage myMessage = new OscMessage("/test");
   xlocationreturn = localxlocation/width;
   ylocationreturn = 1-localylocation/height;
+
   /*sound plugs*/
   OscMessage freqreturn = new OscMessage("/sound/Freq");
   OscMessage reverbreturn = new OscMessage("/sound/reverb");
@@ -304,7 +450,6 @@ public void returnMessage() {
   OscMessage bghuereturn = new OscMessage("/visual/bghue");
   OscMessage bgbrightnessreturn = new OscMessage("/visual/bgbrightness");
   OscMessage forexportreturn = new OscMessage("/visual/lockbg");
-
   OscMessage xyreturn = new OscMessage("/mech/xy");
  
   /*buttons*/
@@ -313,12 +458,12 @@ public void returnMessage() {
 
 
   freqreturn.add(localfreqModulation);
+  panreturn.add(localpanmod);
   reverbreturn.add(localreverbvar);
-  
+
   neighborreturn.add(localneighbordist);
   sizemodreturn.add(localsizemod);
   strokeweightreturn.add(localsweight);
-  panreturn.add(localpanmod);
   separationreturn.add(localseparationforce);
   alignmentreturn.add(localalignmentforce);
   cohesionreturn.add(localcohesionforce);
@@ -331,9 +476,6 @@ public void returnMessage() {
   brightnessreturn.add(localbrightness);
   alphareturn.add(localalpha);
   attractionreturn.add(localxyweight);
-
-  //myMessage.add(mode);
-  //sou.add(soundmodevar);
 
   bgalphareturn.add(localbackgroundalpha);
   bgsaturationreturn.add(localbgsaturation);
@@ -369,246 +511,6 @@ public void returnMessage() {
     oschost.send(bgbrightnessreturn, hostlocation);
     oschost.send(bghuereturn, hostlocation);    
 
-    if (localmode==0.0f){
-
-    }
-    else if (localmode==1.0f) {
-      
-    }
-    else if (localmode==2.0f) {
-      
-    }
-    else if (localmode==3.0f){
-      
-    }
-
-}
-
-
-
-
-
-
-
-
-/*
-
-SynthDef(\sine_harmonic, { |outbus = 0, freq = 0, amp = 0.1, pan = 0|
-  var data, env;
-  
-  data = SinOsc.ar(freq, 0, amp);
-  
-  data = Pan2.ar(data, pan);
-  
-  Out.ar(outbus, data);
-}).store;
-
-
-SynthDef(\pulser, { |freq = 50, amp = 0.1, pan = 0, outbus = 0|
-  var data;
-  
-  data = Impulse.ar(freq, 0, amp);
-  data = Pan2.ar(data, pan);
-  data = Decay.ar(data, 0.005);
-  data = data * SinOsc.ar(freq);
-  
-  Out.ar(outbus, data);
-}).store;
-
-
-// reverb
-SynthDef(\fx_rev_gverb, { |inbus = 0, outbus = 0, wet = 0.5, fade = 1.0, roomsize = 50, reverbtime = 1.0, damp = 0.995, amp = 1.0|
-  var in, out;
-  
-  wet = Lag.kr(wet, fade);
-  wet = wet * 0.5;
-  
-  reverbtime = Lag.kr(reverbtime, fade) * 0.5;
-  in = In.ar(inbus, 2) * amp;
-  out = GVerb.ar(in, roomsize, reverbtime, damp);
-  out = (wet * out) + ((1.0 - wet) * in);
-  
-  Out.ar(outbus, out);
-}).store;
-
-*/
-/*
-OSC,
-The facilitator of communication.
-*/
-
-OscP5 oscP5;
-OscP5 oschost;
-NetAddress myRemoteLocation;
-NetAddress hostlocation;
-
-/*all the values*/
-
-public void neighbordist(float neighbordistin){
-  localneighbordist=neighbordistin;
-  println(localneighbordist);
-}
-public void freq(float freqModulationin){
-  localfreqModulation=freqModulationin;
-  println(localfreqModulation);
-}
-public void reverb(float reverbin){
-  localreverbvar=reverbin;
-  println(reverbin);
-}
-public void sizemod(float sizemodin){
-  localsizemod=sizemodin;
-  println(sizemodin);
-}
-public void sweight(float sweightin){
-  localsweight=sweightin;
-  println(sweightin);
-}
-public void panmod(float panmodin){
-  localpanmod=panmodin;
-  println(panmodin);
-}
-public void maxspeed(float maxspeedin){
-  localmaxspeed=maxspeedin;
-  println(maxspeedin);
-}
-public void separationforce(float separationforcein){
-  localseparationforce=separationforcein;
-  println(separationforcein);
-}
-public void alignmentforce(float alignmentforcein){
-  localalignmentforce=alignmentforcein;
-  println(alignmentforcein);
-}
-public void cohesionforce(float cohesionforcein){
-  localcohesionforce=cohesionforcein;
-  println(cohesionforcein);
-}
-public void separationdistance(float separationdistancein){
-  localseparationdistance=separationdistancein;
-  println(separationdistancein);
-}
-public void attraction(float attractionin){
-  localxyweight=attractionin;
-  println(attractionin);
-}
-public void visualsize(float visualsizein){
-  localvisualsize=visualsizein;
-  println(visualsizein);
-}
-public void hue(float huein){
-  localhue=huein;
-  println(huein);
-}
-public void saturation(float saturationin){
-  localsaturation=saturationin;
-  println(saturationin);
-}
-public void brightness(float brightnessin){
-  localbrightness=brightnessin;
-  println(brightnessin);
-}
-public void alpha(float alphain){
-  localalpha=alphain;
-  println(alphain);
-}
-public void backgroundalpha(float in){
-  localbackgroundalpha=in;
-}
-public void backgroundhue(float in){
-  localbghue=in;
-}
-public void backgroundsaturation(float in){
-  localbgsaturation=in;
-}
-public void backgroundbrightness(float in){
-  localbgbrightness=in;
-}
-
-/*Radio buttons*/
-
-public void rainbow(){
-  localmode=3.0f;
-  println("mode: " +localmode);
-}
-public void circle(){
-  localmode=2.0f;
-  println("mode: " +localmode);
-}
-public void bezier(){
-  localmode=1.0f;
-  println("mode: " +localmode);
-}
-public void entropic(){
-  localmode=0.0f;
-  println("mode: " +localmode);
-}
-//soundmodes
-
-public void wind(){
-  localsoundmodevar=3.0f;
-  println("mode: " +localsoundmodevar);
-}
-public void windMONO(){
-  localsoundmodevar=2.0f;
-  println("mode: " +localsoundmodevar);
-}
-public void some(){
-  localsoundmodevar=1.0f;
-  println("mode: " +localsoundmodevar);
-}
-public void someINVERT(){
-  localsoundmodevar=0.0f;
-  println("mode: " +localsoundmodevar);
-}
-
-
-public void startandstop(float startedvalin){
-  localstartedval=startedvalin;
-  println("localstartedvalin");
-}
-public void killtheclient(){
-  if(localexitval==0.0f){
-    localexitval=1.0f;
-  }
-  else {
-  localexitval=0.0f; 
-  }
-}
-public void forexport(){
-  if (localforexport==0.0f)
-  {
-    localforexport=1.0f;
-  }
-  else
-  {
-    localforexport=0.0f;
-  }
-  
-}
-
-public void savescreenin(){
-  if (localsavescreen==0.0f){
-    localsavescreen=1.0f;
-  }
-  else {
-    localsavescreen=0.0f;
-    }
-}
-
-/*x & y */
-
-public void location(float ylocationin, float xlocationin){
-  println("x variable="+xlocationin);
-  localxlocation=xlocationin*width;
-  println("y variable="+ylocationin);
-  localylocation=height-ylocationin*height;
-  returnMessage();
-}
-
-public void toggleAttraction(){
-  localxyweight=0.0f; 
-  returnMessage();   
 }
 /*The boid class. watch out this ones a banger!*/
 
