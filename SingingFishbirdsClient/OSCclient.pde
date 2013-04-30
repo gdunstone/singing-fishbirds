@@ -211,3 +211,7 @@ public void location(float ylocationin, float xlocationin){
   println("y variable="+ylocationin);
   localylocation=height-ylocationin*height;
 }
+
+public void toggleAttraction(){
+  localxyweight=0.0;    
+}

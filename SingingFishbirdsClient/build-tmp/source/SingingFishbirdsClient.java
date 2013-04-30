@@ -53,18 +53,18 @@ LIKE THE LICENSE IS ANGRY AND SHOUTING AT YOU?!?
 
 
 
-  float localfreqModulation = 1;
+  float localfreqModulation = 30;
   float localreverbvar = 1;
-  float localneighbordist = 0.0f;
-  float localsizemod = 2;
+  float localneighbordist = 1000.0f;
+  float localsizemod = 10;
   float localsweight = 1;
   float localpanmod = 1;
   float localseparationforce = 1.5f;
   float localalignmentforce = 1.0f;
-  float localcohesionforce = 1.1f;
+  float localcohesionforce = 1.4f;
   float localmaxspeed = 2;
   float localseparationdistance = 40.0f;
-  float localsoundmodevar = 0;
+  float localsoundmodevar = 3;
   float localvisualsize = 2;
   float localhue = 80;
   float localsaturation = 255;
@@ -82,7 +82,7 @@ LIKE THE LICENSE IS ANGRY AND SHOUTING AT YOU?!?
   float localxyweight = 0.0f;
   float localxlocation = 0.0f;
   float localylocation = 0.0f;
-
+  float toggleattractionval = 0.0f;
 
 float number = 22;
 Synth reverb;
@@ -111,7 +111,6 @@ public void setup() {
   oscP5.plug(this,"neighbordist","/mech/neighbor");
   oscP5.plug(this,"attraction","/mech/attraction");
 
-
   /*visual plugs*/
   oscP5.plug(this,"sizemod","/visual/sizemod");
   oscP5.plug(this,"sweight","/visual/strokeweight");
@@ -127,13 +126,13 @@ public void setup() {
 
   /*buttons*/
   oscP5.plug(this,"startandstop","/radio/startstop/1/1");
-   oscP5.plug(this,"savescreenin","/radio/savescreen/1/1");
+   //oscP5.plug(this,"toggleattraction","/mech/toggleattraction");
   oscP5.plug(this,"killtheclient","/visual/bgalpha");
 
   reverb = new Synth("fx_rev_gverb");
   reverb.set("wet", 0.0f);
   reverb.set("reverbtime", 1.5f);
-  reverb.set("damp", 0.7f);
+  reverb.set("damp", 0.3f);
   reverb.addToTail();
   
   flock = new Flock();
@@ -144,13 +143,6 @@ public void setup() {
   }
 
   startAudio();
-}
-
-public void mousePressed(){
-  if(localstartedval==0.0f){localstartedval=1.0f;}
-  else {
-  localstartedval=0.0f;    
-  }
 }
 
 /*some global variables*/
@@ -185,12 +177,17 @@ public void draw() {
     saveFrame(); 
   }
 
-    if (localexitval==1){
+ if (localexitval==1){
     exit();
   }
 
   reverb.set("wet", 0+localreverbvar);
+println(localxyweight);
+
 }
+
+/*END DRAW*/
+
 /*function to start the audio*/
 
 public void startAudio(){
@@ -199,6 +196,7 @@ public void startAudio(){
       flock.synths.get(i).set("freq", 0);
       flock.synths.get(i).create();
     }
+
 }
 
 /*EXIT*/
@@ -261,10 +259,12 @@ public void oscEvent(OscMessage theOscMessage) {
     savescreenin();
   }
 
+/*attraction reset*/
+  if(theOscMessage.addrPattern().equals("/mech/toggleattraction")) { 
+    toggleAttraction();
+  }
+
 }
-
-
-
 
 
 
@@ -526,6 +526,10 @@ public void location(float ylocationin, float xlocationin){
   println("y variable="+ylocationin);
   localylocation=height-ylocationin*height;
 }
+
+public void toggleAttraction(){
+  localxyweight=0.0f;    
+}
 /*The boid class. watch out this ones a banger!*/
 
 class Boid {
@@ -569,12 +573,12 @@ class Boid {
     sep.mult(localseparationforce);
     ali.mult(localalignmentforce);
     coh.mult(localcohesionforce);
-        xy.mult(localxyweight);
+    xy.mult(localxyweight);
     //add the force vectors to accel
     applyForce(sep);
     applyForce(ali);
     applyForce(coh);
-        applyForce(xy);
+    applyForce(xy);
   }
   public void update() {
     //update velocity

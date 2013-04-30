@@ -33,18 +33,18 @@ import supercollider.*;
 
 import oscP5.*;
 import netP5.*;
-  float localfreqModulation = 1;
+  float localfreqModulation = 30;
   float localreverbvar = 1;
-  float localneighbordist = 0.0;
-  float localsizemod = 2;
+  float localneighbordist = 1000.0;
+  float localsizemod = 10;
   float localsweight = 1;
   float localpanmod = 1;
   float localseparationforce = 1.5;
   float localalignmentforce = 1.0;
-  float localcohesionforce = 1.1;
+  float localcohesionforce = 1.4;
   float localmaxspeed = 2;
   float localseparationdistance = 40.0;
-  float localsoundmodevar = 0;
+  float localsoundmodevar = 3;
   float localvisualsize = 2;
   float localhue = 80;
   float localsaturation = 255;
@@ -62,7 +62,7 @@ import netP5.*;
   float localxyweight = 0.0;
   float localxlocation = 0.0;
   float localylocation = 0.0;
-
+  float toggleattractionval = 0.0;
 
 float number = 22;
 Synth reverb;
@@ -91,7 +91,6 @@ void setup() {
   oscP5.plug(this,"neighbordist","/mech/neighbor");
   oscP5.plug(this,"attraction","/mech/attraction");
 
-
   /*visual plugs*/
   oscP5.plug(this,"sizemod","/visual/sizemod");
   oscP5.plug(this,"sweight","/visual/strokeweight");
@@ -107,13 +106,13 @@ void setup() {
 
   /*buttons*/
   oscP5.plug(this,"startandstop","/radio/startstop/1/1");
-   oscP5.plug(this,"savescreenin","/radio/savescreen/1/1");
+   //oscP5.plug(this,"toggleattraction","/mech/toggleattraction");
   oscP5.plug(this,"killtheclient","/visual/bgalpha");
 
   reverb = new Synth("fx_rev_gverb");
   reverb.set("wet", 0.0);
   reverb.set("reverbtime", 1.5);
-  reverb.set("damp", 0.7);
+  reverb.set("damp", 0.3);
   reverb.addToTail();
   
   flock = new Flock();
@@ -124,13 +123,6 @@ void setup() {
   }
 
   startAudio();
-}
-
-void mousePressed(){
-  if(localstartedval==0.0){localstartedval=1.0;}
-  else {
-  localstartedval=0.0;    
-  }
 }
 
 /*some global variables*/
@@ -165,12 +157,17 @@ void draw() {
     saveFrame(); 
   }
 
-    if (localexitval==1){
+ if (localexitval==1){
     exit();
   }
 
   reverb.set("wet", 0+localreverbvar);
+println(localxyweight);
+
 }
+
+/*END DRAW*/
+
 /*function to start the audio*/
 
 public void startAudio(){
@@ -179,6 +176,7 @@ public void startAudio(){
       flock.synths.get(i).set("freq", 0);
       flock.synths.get(i).create();
     }
+
 }
 
 /*EXIT*/
@@ -241,9 +239,12 @@ void oscEvent(OscMessage theOscMessage) {
     savescreenin();
   }
 
+/*attraction reset*/
+  if(theOscMessage.addrPattern().equals("/mech/toggleattraction")) { 
+    toggleAttraction();
+  }
+
 }
-
-
 
 
 
