@@ -153,23 +153,6 @@ void render() {
 
   //wraparound 
 void borders() {
-   
-/* use these for later when you want to implement wraparound :-)
-   if (location.x > width) {
-      location.x = 0;//random(-1,-2);
-    } 
-    else if (location.x < 0) {
-      location.x = width;//random(1,2);
-    } // X
-
-       if (location.y > height) {
-      location.y = 0;//random(-1,-2);
-    } 
-    else if (location.y < 0) {
-      location.y = height;//random(1,2);
-    } // X
-   
-*/
 
    if (location.x > width) {
       velocity.x = -velocity.x;
@@ -281,13 +264,6 @@ void borders() {
       }
       
     }
-      /*if (location.x> mouseX-40 && location.x<mouseX+40)
-      {
-        if (location.y>mouseY-40&& location.y<mouseY+40)
-        {velocity.sub(velocity);
-         velocity.normalize();
-        }
-      }*/
     if (count > 0) {
       
       return seek(sum); //steer towards the location

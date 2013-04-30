@@ -4,7 +4,6 @@
 class Flock {
   ArrayList<Boid> boids; //an arraylist for the boids to live in
   ArrayList<Synth> synths;
-  ArrayList<Synth> pulsesynths;
   Flock(){
     boids = new ArrayList<Boid>(); //initialize the arraylist
     synths = new ArrayList<Synth>();

@@ -5,56 +5,75 @@ The facilitator of communication.
 
 /*all the functions*/
 
-public void neighbordist(float neighbordistin){
-  localneighbordist=neighbordistin;
+/*SOUND*/
+public void freq(float in){
+  localfreqModulation=in;
 }
-public void freq(float freqModulationin){
-  localfreqModulation=freqModulationin;
+public void reverb(float in){
+  localreverbvar=in;
 }
-public void reverb(float reverbin){
-  localreverbvar=reverbin;
+public void panmod(float in){
+  localpanmod=in;
 }
-public void sizemod(float sizemodin){
-  localsizemod=sizemodin;
+
+/*MECHANICS*/
+public void maxspeed(float in){
+  localmaxspeed=in;
 }
-public void sweight(float sweightin){
-  localsweight=sweightin;
+public void separationforce(float in){
+  localseparationforce=in;
 }
-public void panmod(float panmodin){
-  localpanmod=panmodin;
+public void alignmentforce(float in){
+  localalignmentforce=in;
 }
-public void maxspeed(float maxspeedin){
-  localmaxspeed=maxspeedin;
+public void cohesionforce(float in){
+  localcohesionforce=in;
 }
-public void separationforce(float separationforcein){
-  localseparationforce=separationforcein;
+public void separationdistance(float in){
+  localseparationdistance=in;
 }
-public void alignmentforce(float alignmentforcein){
-  localalignmentforce=alignmentforcein;
+
+public void neighbordist(float in){
+  localneighbordist=in;
 }
-public void cohesionforce(float cohesionforcein){
-  localcohesionforce=cohesionforcein;
+public void visualsize(float in){
+  localvisualsize=in;
 }
-public void separationdistance(float separationdistancein){
-  localseparationdistance=separationdistancein;
+public void framerateFunc(float in){
+  localframerate=in;
 }
-public void attraction(float attractionin){
-  localxyweight=attractionin;
+
+/*xyPad + associated attraction*/
+
+public void location(float yin, float xin){
+  localxlocation=xin*width;
+  localylocation=height-yin*height;
 }
-public void visualsize(float visualsizein){
-  localvisualsize=visualsizein;
+public void toggleAttraction(){
+  localxyweight=0.0;
 }
-public void hue(float huein){
-  localhue=huein;
+public void attraction(float in){
+  localxyweight=in;
 }
-public void saturation(float saturationin){
-  localsaturation=saturationin;
+
+/*VISUAL/RENDERING*/
+public void sizemod(float in){
+  localsizemod=in;
 }
-public void brightness(float brightnessin){
-  localbrightness=brightnessin;
+public void sweight(float in){
+  localsweight=in;
 }
-public void alpha(float alphain){
-  localalpha=alphain;
+public void hue(float in){
+  localhue=in;
+}
+public void saturation(float in){
+  localsaturation=in;
+}
+public void brightness(float in){
+  localbrightness=in;
+}
+public void alpha(float in){
+  localalpha=in;
 }
 public void backgroundalpha(float in){
   localbackgroundalpha=in;
@@ -69,8 +88,7 @@ public void backgroundbrightness(float in){
   localbgbrightness=in;
 }
 
-/*Radio buttons*/
-
+/*RENDERMODES*/
 public void rainbow(){
   localmode=3.0;
 }
@@ -84,8 +102,7 @@ public void entropic(){
   localmode=0.0;
 }
 
-//soundmodes
-
+/*SOUNDMODES*/
 public void wind(){
   localsoundmodevar=3.0;
 }
@@ -99,9 +116,9 @@ public void someINVERT(){
   localsoundmodevar=0.0;
 }
 
-
-public void startandstop(float startedvalin){
-  localstartedval=startedvalin;
+/*MISC functions*/
+public void startandstop(float in){
+  localstartedval=in;
 }
 
 public void killtheclient(){
@@ -109,25 +126,11 @@ public void killtheclient(){
     localexitval=1.0;
   }
 }
-
 public void forexport(float in){
   localforexport=in;
 }
 
-public void savescreenin(){
-    saveFrame();
-}
 
-/*x & y */
-
-public void location(float ylocationin, float xlocationin){
-  localxlocation=xlocationin*width;
-  localylocation=height-ylocationin*height;
-}
-
-public void toggleAttraction(){
-  localxyweight=0.0;
-}
 
 
 /*oscEvent, for stuff that i couldnt oscP5.plug()*/
@@ -142,7 +145,7 @@ void oscEvent(OscMessage theOscMessage) {
   println("recieved from: "+address);
   */
 
-  //send the current state back to the device
+/*send the current state back to the device when a message is recieved*/
   returnMessage();
 
 /* render modes */
@@ -173,17 +176,17 @@ void oscEvent(OscMessage theOscMessage) {
     someINVERT();//0
   }
 
+//kill the client
   if(theOscMessage.addrPattern().equals("/visual/killtheclient")) { 
     killtheclient();
   }
 
-/*savescreen*/
-
+//save dat pic!
   if(theOscMessage.addrPattern().equals("/visual/save")) { 
-    savescreenin();
+    saveFrame();
   }
 
-/*attraction reset*/
+//reset attraction on xyPad
   if(theOscMessage.addrPattern().equals("/mech/toggleattraction")) { 
     toggleAttraction();
   }
@@ -208,6 +211,8 @@ void returnMessage() {
   OscMessage cohesionreturn = new OscMessage("/mech/cohesion");
   OscMessage neighborreturn = new OscMessage("/mech/neighbor");
   OscMessage attractionreturn = new OscMessage("/mech/attraction");
+  OscMessage frameratereturn = new OscMessage("/mech/framerate");
+  OscMessage xyreturn = new OscMessage("/mech/xy");
 
   /*visual plugs*/
   OscMessage sizemodreturn = new OscMessage("/visual/sizemod");
@@ -222,10 +227,11 @@ void returnMessage() {
   OscMessage bghuereturn = new OscMessage("/visual/bghue");
   OscMessage bgbrightnessreturn = new OscMessage("/visual/bgbrightness");
   OscMessage forexportreturn = new OscMessage("/visual/lockbg");
-  OscMessage xyreturn = new OscMessage("/mech/xy");
+
  
   /*buttons*/
   OscMessage startstopreturn = new OscMessage("/radio/startstop/1/1");
+
   startstopreturn.add(localstartedval);
 
 
@@ -241,6 +247,7 @@ void returnMessage() {
   cohesionreturn.add(localcohesionforce);
   maxspeedreturn.add(localmaxspeed);
   sepdistancereturn.add(localseparationdistance);
+  frameratereturn.add(localframerate);
 
   visualsizereturn.add(localvisualsize);
   huereturn.add(localhue);
@@ -281,6 +288,7 @@ void returnMessage() {
     oschost.send(xyreturn,hostlocation);
     oschost.send(bgsaturationreturn, hostlocation);
     oschost.send(bgbrightnessreturn, hostlocation);
-    oschost.send(bghuereturn, hostlocation);    
+    oschost.send(bghuereturn, hostlocation);  
+    oschost.send(frameratereturn, hostlocation);   
 
 }

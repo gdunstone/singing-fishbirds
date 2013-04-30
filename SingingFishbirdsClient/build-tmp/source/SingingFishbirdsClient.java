@@ -79,6 +79,7 @@ float localstartedval=0.0f;
 float localexitval = 0;
 float attractionval = 0.0f;
 float localforexport = 0.0f;
+float localframerate = 25.0f;
 
 float localxyweight = 0.0f;
 float localxlocation = 0.0f;
@@ -108,8 +109,11 @@ Synth reverb;
 Flock flock;
 
 public void setup() {
+  if (frame != null) {
+    frame.setResizable(true);
+  }
   size(1300,800);
-  frameRate(120);
+
   colorMode(HSB);
 
   /*setup oscp5 for send and recieve*/
@@ -132,6 +136,7 @@ public void setup() {
   oscP5.plug(this,"cohesionforce","/mech/cohesion");
   oscP5.plug(this,"neighbordist","/mech/neighbor");
   oscP5.plug(this,"attraction","/mech/attraction");
+  oscP5.plug(this,"framerateFunc","/mech/framerate");
 
   /*visual plugs*/
   oscP5.plug(this,"sizemod","/visual/sizemod");
@@ -177,6 +182,7 @@ float[] numbers = new float[numberOfPoints];
 /*DRAW*/
 
 public void draw() {
+    frameRate(localframerate);
   if (localstartedval==1.0f)
     {
       flock.run();
@@ -233,56 +239,75 @@ The facilitator of communication.
 
 /*all the functions*/
 
-public void neighbordist(float neighbordistin){
-  localneighbordist=neighbordistin;
+/*SOUND*/
+public void freq(float in){
+  localfreqModulation=in;
 }
-public void freq(float freqModulationin){
-  localfreqModulation=freqModulationin;
+public void reverb(float in){
+  localreverbvar=in;
 }
-public void reverb(float reverbin){
-  localreverbvar=reverbin;
+public void panmod(float in){
+  localpanmod=in;
 }
-public void sizemod(float sizemodin){
-  localsizemod=sizemodin;
+
+/*MECHANICS*/
+public void maxspeed(float in){
+  localmaxspeed=in;
 }
-public void sweight(float sweightin){
-  localsweight=sweightin;
+public void separationforce(float in){
+  localseparationforce=in;
 }
-public void panmod(float panmodin){
-  localpanmod=panmodin;
+public void alignmentforce(float in){
+  localalignmentforce=in;
 }
-public void maxspeed(float maxspeedin){
-  localmaxspeed=maxspeedin;
+public void cohesionforce(float in){
+  localcohesionforce=in;
 }
-public void separationforce(float separationforcein){
-  localseparationforce=separationforcein;
+public void separationdistance(float in){
+  localseparationdistance=in;
 }
-public void alignmentforce(float alignmentforcein){
-  localalignmentforce=alignmentforcein;
+
+public void neighbordist(float in){
+  localneighbordist=in;
 }
-public void cohesionforce(float cohesionforcein){
-  localcohesionforce=cohesionforcein;
+public void visualsize(float in){
+  localvisualsize=in;
 }
-public void separationdistance(float separationdistancein){
-  localseparationdistance=separationdistancein;
+public void framerateFunc(float in){
+  localframerate=in;
 }
-public void attraction(float attractionin){
-  localxyweight=attractionin;
+
+/*xyPad + associated attraction*/
+
+public void location(float yin, float xin){
+  localxlocation=xin*width;
+  localylocation=height-yin*height;
 }
-public void visualsize(float visualsizein){
-  localvisualsize=visualsizein;
+public void toggleAttraction(){
+  localxyweight=0.0f;
 }
-public void hue(float huein){
-  localhue=huein;
+public void attraction(float in){
+  localxyweight=in;
 }
-public void saturation(float saturationin){
-  localsaturation=saturationin;
+
+/*VISUAL/RENDERING*/
+public void sizemod(float in){
+  localsizemod=in;
 }
-public void brightness(float brightnessin){
-  localbrightness=brightnessin;
+public void sweight(float in){
+  localsweight=in;
 }
-public void alpha(float alphain){
-  localalpha=alphain;
+public void hue(float in){
+  localhue=in;
+}
+public void saturation(float in){
+  localsaturation=in;
+}
+public void brightness(float in){
+  localbrightness=in;
+}
+public void alpha(float in){
+  localalpha=in;
 }
 public void backgroundalpha(float in){
   localbackgroundalpha=in;
@@ -297,8 +322,7 @@ public void backgroundbrightness(float in){
   localbgbrightness=in;
 }
 
-/*Radio buttons*/
-
+/*RENDERMODES*/
 public void rainbow(){
   localmode=3.0f;
 }
@@ -312,8 +336,7 @@ public void entropic(){
   localmode=0.0f;
 }
 
-//soundmodes
-
+/*SOUNDMODES*/
 public void wind(){
   localsoundmodevar=3.0f;
 }
@@ -327,9 +350,9 @@ public void someINVERT(){
   localsoundmodevar=0.0f;
 }
 
-
-public void startandstop(float startedvalin){
-  localstartedval=startedvalin;
+/*MISC functions*/
+public void startandstop(float in){
+  localstartedval=in;
 }
 
 public void killtheclient(){
@@ -337,25 +360,11 @@ public void killtheclient(){
     localexitval=1.0f;
   }
 }
-
 public void forexport(float in){
   localforexport=in;
 }
 
-public void savescreenin(){
-    saveFrame();
-}
 
-/*x & y */
-
-public void location(float ylocationin, float xlocationin){
-  localxlocation=xlocationin*width;
-  localylocation=height-ylocationin*height;
-}
-
-public void toggleAttraction(){
-  localxyweight=0.0f;
-}
 
 
 /*oscEvent, for stuff that i couldnt oscP5.plug()*/
@@ -370,7 +379,7 @@ public void oscEvent(OscMessage theOscMessage) {
   println("recieved from: "+address);
   */
 
-  //send the current state back to the device
+/*send the current state back to the device when a message is recieved*/
   returnMessage();
 
 /* render modes */
@@ -401,17 +410,17 @@ public void oscEvent(OscMessage theOscMessage) {
     someINVERT();//0
   }
 
+//kill the client
   if(theOscMessage.addrPattern().equals("/visual/killtheclient")) { 
     killtheclient();
   }
 
-/*savescreen*/
-
+//save dat pic!
   if(theOscMessage.addrPattern().equals("/visual/save")) { 
-    savescreenin();
+    saveFrame();
   }
 
-/*attraction reset*/
+//reset attraction on xyPad
   if(theOscMessage.addrPattern().equals("/mech/toggleattraction")) { 
     toggleAttraction();
   }
@@ -436,6 +445,8 @@ public void returnMessage() {
   OscMessage cohesionreturn = new OscMessage("/mech/cohesion");
   OscMessage neighborreturn = new OscMessage("/mech/neighbor");
   OscMessage attractionreturn = new OscMessage("/mech/attraction");
+  OscMessage frameratereturn = new OscMessage("/mech/framerate");
+  OscMessage xyreturn = new OscMessage("/mech/xy");
 
   /*visual plugs*/
   OscMessage sizemodreturn = new OscMessage("/visual/sizemod");
@@ -450,10 +461,11 @@ public void returnMessage() {
   OscMessage bghuereturn = new OscMessage("/visual/bghue");
   OscMessage bgbrightnessreturn = new OscMessage("/visual/bgbrightness");
   OscMessage forexportreturn = new OscMessage("/visual/lockbg");
-  OscMessage xyreturn = new OscMessage("/mech/xy");
+
  
   /*buttons*/
   OscMessage startstopreturn = new OscMessage("/radio/startstop/1/1");
+
   startstopreturn.add(localstartedval);
 
 
@@ -469,6 +481,7 @@ public void returnMessage() {
   cohesionreturn.add(localcohesionforce);
   maxspeedreturn.add(localmaxspeed);
   sepdistancereturn.add(localseparationdistance);
+  frameratereturn.add(localframerate);
 
   visualsizereturn.add(localvisualsize);
   huereturn.add(localhue);
@@ -509,7 +522,8 @@ public void returnMessage() {
     oschost.send(xyreturn,hostlocation);
     oschost.send(bgsaturationreturn, hostlocation);
     oschost.send(bgbrightnessreturn, hostlocation);
-    oschost.send(bghuereturn, hostlocation);    
+    oschost.send(bghuereturn, hostlocation);  
+    oschost.send(frameratereturn, hostlocation);   
 
 }
 /*The boid class. watch out this ones a banger!*/
@@ -667,23 +681,6 @@ public void render() {
 
   //wraparound 
 public void borders() {
-   
-/* use these for later when you want to implement wraparound :-)
-   if (location.x > width) {
-      location.x = 0;//random(-1,-2);
-    } 
-    else if (location.x < 0) {
-      location.x = width;//random(1,2);
-    } // X
-
-       if (location.y > height) {
-      location.y = 0;//random(-1,-2);
-    } 
-    else if (location.y < 0) {
-      location.y = height;//random(1,2);
-    } // X
-   
-*/
 
    if (location.x > width) {
       velocity.x = -velocity.x;
@@ -795,13 +792,6 @@ public void borders() {
       }
       
     }
-      /*if (location.x> mouseX-40 && location.x<mouseX+40)
-      {
-        if (location.y>mouseY-40&& location.y<mouseY+40)
-        {velocity.sub(velocity);
-         velocity.normalize();
-        }
-      }*/
     if (count > 0) {
       
       return seek(sum); //steer towards the location
@@ -817,7 +807,6 @@ public void borders() {
 class Flock {
   ArrayList<Boid> boids; //an arraylist for the boids to live in
   ArrayList<Synth> synths;
-  ArrayList<Synth> pulsesynths;
   Flock(){
     boids = new ArrayList<Boid>(); //initialize the arraylist
     synths = new ArrayList<Synth>();

@@ -59,6 +59,7 @@ float localstartedval=0.0;
 float localexitval = 0;
 float attractionval = 0.0;
 float localforexport = 0.0;
+float localframerate = 25.0;
 
 float localxyweight = 0.0;
 float localxlocation = 0.0;
@@ -88,8 +89,11 @@ Synth reverb;
 Flock flock;
 
 void setup() {
+  if (frame != null) {
+    frame.setResizable(true);
+  }
   size(1300,800);
-  frameRate(120);
+
   colorMode(HSB);
 
   /*setup oscp5 for send and recieve*/
@@ -112,6 +116,7 @@ void setup() {
   oscP5.plug(this,"cohesionforce","/mech/cohesion");
   oscP5.plug(this,"neighbordist","/mech/neighbor");
   oscP5.plug(this,"attraction","/mech/attraction");
+  oscP5.plug(this,"framerateFunc","/mech/framerate");
 
   /*visual plugs*/
   oscP5.plug(this,"sizemod","/visual/sizemod");
@@ -157,6 +162,7 @@ float[] numbers = new float[numberOfPoints];
 /*DRAW*/
 
 void draw() {
+    frameRate(localframerate);
   if (localstartedval==1.0)
     {
       flock.run();
