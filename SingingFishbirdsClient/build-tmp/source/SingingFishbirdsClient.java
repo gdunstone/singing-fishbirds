@@ -53,7 +53,7 @@ LIKE THE LICENSE IS ANGRY AND SHOUTING AT YOU?!?
 
 
 
-  float localfreqModulation = 30;
+  float localfreqModulation = 200;
   float localreverbvar = 1;
   float localneighbordist = 1000.0f;
   float localsizemod = 10;
@@ -83,7 +83,8 @@ LIKE THE LICENSE IS ANGRY AND SHOUTING AT YOU?!?
   float localxlocation = 0.0f;
   float localylocation = 0.0f;
   float toggleattractionval = 0.0f;
-
+  float xlocationreturn = 0.0f;
+  float ylocationreturn = 0.0f;
 float number = 22;
 Synth reverb;
 Flock flock;
@@ -92,7 +93,8 @@ public void setup() {
   size(1350,750);
   colorMode(HSB);
   oscP5 = new OscP5(this,12000);
-
+  oschost = new OscP5(this,10000);
+  hostlocation = new NetAddress("169.254.170.253",10000);
   myRemoteLocation = new NetAddress("127.0.0.1",12000);
 
   oscP5.plug(this,"test","/test");
@@ -141,7 +143,7 @@ public void setup() {
     //flock.addBoid(new Boid(random(0,100)),random(0,100));
     flock.addBoid(new Boid(random(width),random(height)));
   }
-
+returnMessage();
   startAudio();
 }
 
@@ -154,7 +156,7 @@ float[] numbers = new float[numberOfPoints];
 /*DRAW*/
 
 public void draw() {
-  
+
   frameRate(25);
   if(localmode==1.0f){
     background(0);
@@ -182,7 +184,6 @@ public void draw() {
   }
 
   reverb.set("wet", 0+localreverbvar);
-println(localxyweight);
 
 }
 
@@ -196,7 +197,7 @@ public void startAudio(){
       flock.synths.get(i).set("freq", 0);
       flock.synths.get(i).create();
     }
-
+ 
 }
 
 /*EXIT*/
@@ -267,12 +268,117 @@ public void oscEvent(OscMessage theOscMessage) {
 }
 
 
+public void returnMessage() {
+  /* createan osc message with address pattern /test */
+  //OscMessage myMessage = new OscMessage("/test");
+  xlocationreturn = localxlocation/width;
+  ylocationreturn = 1-localylocation/height;
+  println(xlocationreturn);
+  println(ylocationreturn);
+  /*sound plugs*/
+  OscMessage freqreturn = new OscMessage("/sound/Freq");
+  OscMessage reverbreturn = new OscMessage("/sound/reverb");
+  OscMessage panreturn = new OscMessage("/sound/PanWeight");
+
+  /*mech plugs*/
+  OscMessage maxspeedreturn = new OscMessage("/mech/maxspeed");
+  OscMessage alignmentreturn = new OscMessage("/mech/alignment");
+  OscMessage separationreturn = new OscMessage("/mech/separation");
+  OscMessage sepdistancereturn = new OscMessage("/mech/sepdistance");
+  OscMessage cohesionreturn = new OscMessage("/mech/cohesion");
+  OscMessage neighborreturn = new OscMessage("/mech/neighbor");
+  OscMessage attractionreturn = new OscMessage("/mech/attraction");
+
+  /*visual plugs*/
+  OscMessage sizemodreturn = new OscMessage("/visual/sizemod");
+  OscMessage strokeweightreturn = new OscMessage("/visual/strokeweight");
+  OscMessage huereturn = new OscMessage("/visual/hue");
+  OscMessage saturationreturn = new OscMessage("/visual/saturation");
+  OscMessage brightnessreturn = new OscMessage("/visual/brightness");
+  OscMessage alphareturn = new OscMessage("/visual/alpha");
+  OscMessage visualsizereturn = new OscMessage("/visual/visualsize");
+  OscMessage bgalphareturn = new OscMessage("/visual/bgalpha");
+
+
+  OscMessage xyreturn = new OscMessage("/mech/xy");
+
+  /*buttons*/
+  OscMessage startstopreturn = new OscMessage("/radio/startstop/1/1");
+  startstopreturn.add(localstartedval);
+
+
+  freqreturn.add(localfreqModulation);
+  reverbreturn.add(localreverbvar);
+  
+  neighborreturn.add(localneighbordist);
+  sizemodreturn.add(localsizemod);
+  strokeweightreturn.add(localsweight);
+  panreturn.add(localpanmod);
+  separationreturn.add(localseparationforce);
+  alignmentreturn.add(localalignmentforce);
+  cohesionreturn.add(localcohesionforce);
+  maxspeedreturn.add(localmaxspeed);
+  sepdistancereturn.add(localseparationdistance);
+
+  visualsizereturn.add(localvisualsize);
+  huereturn.add(localhue);
+  saturationreturn.add(localsaturation);
+  brightnessreturn.add(localbrightness);
+  alphareturn.add(localalpha);
+  attractionreturn.add(localxyweight);
+
+  //myMessage.add(mode);
+  //sou.add(soundmodevar);
+
+  bgalphareturn.add(localbackgroundalpha);
+  xyreturn.add(ylocationreturn);
+  xyreturn.add(xlocationreturn);
+
+
+  //send the message to the client
+    oschost.send(freqreturn, hostlocation);
+    oschost.send(neighborreturn, hostlocation);
+    oschost.send(sizemodreturn, hostlocation);
+    oschost.send(strokeweightreturn, hostlocation);
+    oschost.send(panreturn, hostlocation);
+    oschost.send(separationreturn, hostlocation);
+    oschost.send(alignmentreturn, hostlocation);
+    oschost.send(cohesionreturn, hostlocation);
+    oschost.send(maxspeedreturn, hostlocation);
+    oschost.send(sepdistancereturn, hostlocation);
+    oschost.send(visualsizereturn, hostlocation);
+    oschost.send(huereturn, hostlocation);
+    oschost.send(saturationreturn, hostlocation);
+    oschost.send(brightnessreturn, hostlocation);
+    oschost.send(alphareturn, hostlocation);
+    oschost.send(bgalphareturn, hostlocation);
+    oschost.send(startstopreturn, hostlocation);
+    oschost.send(attractionreturn,hostlocation);
+    oschost.send(xyreturn,hostlocation);
+
+    if (localmode==0.0f){
+
+    }
+    else if (localmode==1.0f) {
+      
+    }
+    else if (localmode==2.0f) {
+      
+    }
+    else if (localmode==3.0f){
+      
+    }
+
+}
+
+
+
+
 
 
 
 
 /*
-
 
 SynthDef(\sine_harmonic, { |outbus = 0, freq = 0, amp = 0.1, pan = 0|
   var data, env;
@@ -319,7 +425,9 @@ The facilitator of communication.
 */
 
 OscP5 oscP5;
+OscP5 oschost;
 NetAddress myRemoteLocation;
+NetAddress hostlocation;
 
 public void test( 
   float freqModulationin
@@ -525,10 +633,12 @@ public void location(float ylocationin, float xlocationin){
   localxlocation=xlocationin*width;
   println("y variable="+ylocationin);
   localylocation=height-ylocationin*height;
+  returnMessage();
 }
 
 public void toggleAttraction(){
-  localxyweight=0.0f;    
+  localxyweight=0.0f; 
+  returnMessage();   
 }
 /*The boid class. watch out this ones a banger!*/
 

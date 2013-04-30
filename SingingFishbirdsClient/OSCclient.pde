@@ -4,7 +4,9 @@ The facilitator of communication.
 */
 
 OscP5 oscP5;
+OscP5 oschost;
 NetAddress myRemoteLocation;
+NetAddress hostlocation;
 
 public void test( 
   float freqModulationin
@@ -210,8 +212,10 @@ public void location(float ylocationin, float xlocationin){
   localxlocation=xlocationin*width;
   println("y variable="+ylocationin);
   localylocation=height-ylocationin*height;
+  returnMessage();
 }
 
 public void toggleAttraction(){
-  localxyweight=0.0;    
+  localxyweight=0.0; 
+  returnMessage();   
 }
