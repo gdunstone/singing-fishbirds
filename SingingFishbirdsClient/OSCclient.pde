@@ -130,7 +130,9 @@ public void forexport(float in){
   localforexport=in;
 }
 
-
+public void glowThing(float in){
+  localellipsemode=in;
+}
 
 
 /*oscEvent, for stuff that i couldnt oscP5.plug()*/
@@ -227,6 +229,7 @@ void returnMessage() {
   OscMessage bghuereturn = new OscMessage("/visual/bghue");
   OscMessage bgbrightnessreturn = new OscMessage("/visual/bgbrightness");
   OscMessage forexportreturn = new OscMessage("/visual/lockbg");
+  OscMessage glowreturn = new OscMessage("/visual/glow");
 
  
   /*buttons*/
@@ -261,6 +264,8 @@ void returnMessage() {
   bghuereturn.add(localbghue);
   bgbrightnessreturn.add(localbgbrightness);
   forexportreturn.add(localforexport);
+  glowreturn.add(localellipsemode);
+
   xyreturn.add(ylocationreturn);
   xyreturn.add(xlocationreturn);
 
@@ -285,6 +290,7 @@ void returnMessage() {
     oschost.send(startstopreturn, hostlocation);
     oschost.send(attractionreturn,hostlocation);
     oschost.send(forexportreturn,hostlocation);
+    oschost.send(glowreturn,hostlocation);
     oschost.send(xyreturn,hostlocation);
     oschost.send(bgsaturationreturn, hostlocation);
     oschost.send(bgbrightnessreturn, hostlocation);

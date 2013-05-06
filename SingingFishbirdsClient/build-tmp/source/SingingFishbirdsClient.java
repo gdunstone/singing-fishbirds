@@ -56,7 +56,7 @@ LIKE THE LICENSE IS ANGRY AND SHOUTING AT YOU?!?
 
 /* all the variables: */
 
-float localfreqModulation = 200;
+float localfreqModulation = 100;
 float localreverbvar = 1;
 float localneighbordist = 1000.0f;
 float localsizemod = 10;
@@ -74,6 +74,7 @@ float localsaturation = 255;
 float localbrightness = 255;
 float localalpha = 100;
 float localmode = 3.0f;
+float localellipsemode = 0.0f;
 
 float localstartedval=0.0f;
 float localexitval = 0;
@@ -115,6 +116,7 @@ public void setup() {
   size(1300,800);
 
   colorMode(HSB);
+        ellipseMode(RADIUS);
 
   /*setup oscp5 for send and recieve*/
   oscP5 = new OscP5(this,12000);
@@ -156,6 +158,7 @@ public void setup() {
   oscP5.plug(this,"startandstop","/radio/startstop/1/1");
   oscP5.plug(this,"killtheclient","/visual/bgalpha");
   oscP5.plug(this,"forexport","/visual/lockbg");
+  oscP5.plug(this,"glowThing","/visual/glow");
 
   reverb = new Synth("fx_rev_gverb");
   reverb.set("wet", 0.0f);
@@ -167,7 +170,8 @@ public void setup() {
 
   //add initial
   for (int i=0; i<number; i++) {
-    flock.addBoid(new Boid(random(width),random(height)));
+   // flock.addBoid(new Boid(random(width),random(height)));
+   flock.addBoid(new Boid(width/2, height/2));
   }
   returnMessage();
   startAudio();
@@ -182,15 +186,15 @@ float[] numbers = new float[numberOfPoints];
 /*DRAW*/
 
 public void draw() {
+
     frameRate(localframerate);
   if (localstartedval==1.0f)
     {
-      flock.run();
-
       if (localforexport==0.0f){
         fill(localbghue, localbgsaturation,localbgbrightness, localbackgroundalpha);
         rect(0,0, width,height);
       }
+      flock.run();
     }
 
   else //turn off synths and make bg 0
@@ -364,7 +368,9 @@ public void forexport(float in){
   localforexport=in;
 }
 
-
+public void glowThing(float in){
+  localellipsemode=in;
+}
 
 
 /*oscEvent, for stuff that i couldnt oscP5.plug()*/
@@ -461,6 +467,7 @@ public void returnMessage() {
   OscMessage bghuereturn = new OscMessage("/visual/bghue");
   OscMessage bgbrightnessreturn = new OscMessage("/visual/bgbrightness");
   OscMessage forexportreturn = new OscMessage("/visual/lockbg");
+  OscMessage glowreturn = new OscMessage("/visual/glow");
 
  
   /*buttons*/
@@ -495,6 +502,8 @@ public void returnMessage() {
   bghuereturn.add(localbghue);
   bgbrightnessreturn.add(localbgbrightness);
   forexportreturn.add(localforexport);
+  glowreturn.add(localellipsemode);
+
   xyreturn.add(ylocationreturn);
   xyreturn.add(xlocationreturn);
 
@@ -519,6 +528,7 @@ public void returnMessage() {
     oschost.send(startstopreturn, hostlocation);
     oschost.send(attractionreturn,hostlocation);
     oschost.send(forexportreturn,hostlocation);
+    oschost.send(glowreturn,hostlocation);
     oschost.send(xyreturn,hostlocation);
     oschost.send(bgsaturationreturn, hostlocation);
     oschost.send(bgbrightnessreturn, hostlocation);
@@ -600,6 +610,7 @@ class Boid {
   }
 
 public void render() {
+
   /*soundmodes */
   //soundmode that uses y location for boid frequency and x location for panning.
     if (localsoundmodevar==0.0f){
@@ -628,13 +639,12 @@ public void render() {
         flock.synths.get(i).set("freq", 440-(flock.boids.get(i).diameter)*localfreqModulation);
       }
     }
-    smooth();
+    //smooth();
     noFill();
     pushMatrix();
     translate(location.x, location.y);
 
     /*RENDERMODE! */
-
     if(localmode == 0.0f)
     {
         for (int i = 0; i<numberOfPoints; i++){
@@ -672,8 +682,16 @@ public void render() {
     else if(localmode == 3.0f)
     {
       noStroke();
-      fill(diameter*10, localsaturation,localbrightness, localalpha);
-      ellipse(0, 0, diameter+localvisualsize, diameter+localvisualsize);
+
+      if (localellipsemode==0.0f){
+       fill(diameter*10, localsaturation,localbrightness, localalpha);
+       ellipse(0, 0, diameter+localvisualsize, diameter+localvisualsize);
+      }
+
+      else{
+        drawGradient(diameter+localvisualsize, diameter*10, localsaturation, localbrightness, localalpha);
+      }
+
     }
   popMatrix();
   noStroke();
@@ -801,6 +819,24 @@ public void borders() {
     }
   }
 }
+
+// 
+public void drawGradient(float radius, float ghue, float gsat, float gbri, float galp) {
+  
+  int r2 = PApplet.parseInt(radius);
+  float h = 0;
+
+  fill(ghue, gsat, gbri, galp);
+  ellipse(0,0,radius,radius);
+
+    for (int r = r2+15; r > 0; --r)
+    {
+      fill(ghue, gsat, gbri, h);
+      ellipse(0, 0, r, r);
+      h = (h + 1) % 50;
+    }
+
+}
 // The FLOCK, a list of Boid objects
 
 
@@ -824,7 +860,7 @@ class Flock {
   }
 }
   static public void main(String[] passedArgs) {
-    String[] appletArgs = new String[] { "SingingFishbirdsClient" };
+    String[] appletArgs = new String[] { "--full-screen", "--bgcolor=#666666", "--hide-stop", "SingingFishbirdsClient" };
     if (passedArgs != null) {
       PApplet.main(concat(appletArgs, passedArgs));
     } else {

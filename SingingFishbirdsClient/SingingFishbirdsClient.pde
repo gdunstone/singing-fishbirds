@@ -36,7 +36,7 @@ import netP5.*;
 
 /* all the variables: */
 
-float localfreqModulation = 200;
+float localfreqModulation = 100;
 float localreverbvar = 1;
 float localneighbordist = 1000.0;
 float localsizemod = 10;
@@ -54,6 +54,7 @@ float localsaturation = 255;
 float localbrightness = 255;
 float localalpha = 100;
 float localmode = 3.0;
+float localellipsemode = 0.0;
 
 float localstartedval=0.0;
 float localexitval = 0;
@@ -95,6 +96,7 @@ void setup() {
   size(1300,800);
 
   colorMode(HSB);
+        ellipseMode(RADIUS);
 
   /*setup oscp5 for send and recieve*/
   oscP5 = new OscP5(this,12000);
@@ -136,6 +138,7 @@ void setup() {
   oscP5.plug(this,"startandstop","/radio/startstop/1/1");
   oscP5.plug(this,"killtheclient","/visual/bgalpha");
   oscP5.plug(this,"forexport","/visual/lockbg");
+  oscP5.plug(this,"glowThing","/visual/glow");
 
   reverb = new Synth("fx_rev_gverb");
   reverb.set("wet", 0.0);
@@ -147,7 +150,8 @@ void setup() {
 
   //add initial
   for (int i=0; i<number; i++) {
-    flock.addBoid(new Boid(random(width),random(height)));
+   // flock.addBoid(new Boid(random(width),random(height)));
+   flock.addBoid(new Boid(width/2, height/2));
   }
   returnMessage();
   startAudio();
@@ -162,15 +166,15 @@ float[] numbers = new float[numberOfPoints];
 /*DRAW*/
 
 void draw() {
+
     frameRate(localframerate);
   if (localstartedval==1.0)
     {
-      flock.run();
-
       if (localforexport==0.0){
         fill(localbghue, localbgsaturation,localbgbrightness, localbackgroundalpha);
         rect(0,0, width,height);
       }
+      flock.run();
     }
 
   else //turn off synths and make bg 0

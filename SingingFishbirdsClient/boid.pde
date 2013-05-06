@@ -72,6 +72,7 @@ class Boid {
   }
 
 void render() {
+
   /*soundmodes */
   //soundmode that uses y location for boid frequency and x location for panning.
     if (localsoundmodevar==0.0){
@@ -100,13 +101,12 @@ void render() {
         flock.synths.get(i).set("freq", 440-(flock.boids.get(i).diameter)*localfreqModulation);
       }
     }
-    smooth();
+    //smooth();
     noFill();
     pushMatrix();
     translate(location.x, location.y);
 
     /*RENDERMODE! */
-
     if(localmode == 0.0)
     {
         for (int i = 0; i<numberOfPoints; i++){
@@ -144,8 +144,16 @@ void render() {
     else if(localmode == 3.0)
     {
       noStroke();
-      fill(diameter*10, localsaturation,localbrightness, localalpha);
-      ellipse(0, 0, diameter+localvisualsize, diameter+localvisualsize);
+
+      if (localellipsemode==0.0){
+       fill(diameter*10, localsaturation,localbrightness, localalpha);
+       ellipse(0, 0, diameter+localvisualsize, diameter+localvisualsize);
+      }
+
+      else{
+        drawGradient(diameter+localvisualsize, diameter*10, localsaturation, localbrightness, localalpha);
+      }
+
     }
   popMatrix();
   noStroke();
@@ -272,4 +280,22 @@ void borders() {
       return new PVector(0, 0);
     }
   }
+}
+
+// 
+void drawGradient(float radius, float ghue, float gsat, float gbri, float galp) {
+  
+  int r2 = int(radius);
+  float h = 0;
+
+  fill(ghue, gsat, gbri, galp);
+  ellipse(0,0,radius,radius);
+
+    for (int r = r2+15; r > 0; --r)
+    {
+      fill(ghue, gsat, gbri, h);
+      ellipse(0, 0, r, r);
+      h = (h + 1) % 50;
+    }
+
 }
