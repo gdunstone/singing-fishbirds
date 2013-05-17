@@ -66,21 +66,21 @@ float localseparationforce = 1.5f;
 float localalignmentforce = 1.0f;
 float localcohesionforce = 1.4f;
 float localmaxspeed = 2;
-float localseparationdistance = 40.0f;
+float localseparationdistance = 100.0f;
 float localsoundmodevar = 3;
-float localvisualsize = 2;
+float localvisualsize = 0;
 float localhue = 80;
-float localsaturation = 255;
+float localsaturation = 0;
 float localbrightness = 255;
-float localalpha = 100;
-float localmode = 3.0f;
+float localalpha = 200;
+float localmode = 1.0f;
 float localellipsemode = 0.0f;
 
 float localstartedval=0.0f;
 float localexitval = 0;
 float attractionval = 0.0f;
 float localforexport = 0.0f;
-float localframerate = 25.0f;
+float localframerate = 60.0f;
 
 float localxyweight = 0.0f;
 float localxlocation = 0.0f;
@@ -89,7 +89,7 @@ float toggleattractionval = 0.0f;
 float xlocationreturn = 0.0f;
 float ylocationreturn = 0.0f;
 
-float localbackgroundalpha = 10;
+float localbackgroundalpha = 120;
 float localbgsaturation = 0;
 float localbgbrightness = 0;
 float localbghue = 0;
@@ -123,7 +123,7 @@ public void setup() {
   oschost = new OscP5(this,9000);
 
   //change this to the ip of the host
-  hostlocation = new NetAddress("192.168.1.106",10000);
+  hostlocation = new NetAddress("169.254.170.253",10000);
 
   /*sound plugs*/
   oscP5.plug(this,"freq","/sound/Freq");
@@ -186,7 +186,6 @@ float[] numbers = new float[numberOfPoints];
 /*DRAW*/
 
 public void draw() {
-
     frameRate(localframerate);
   if (localstartedval==1.0f)
     {
@@ -641,12 +640,14 @@ public void render() {
     }
     //smooth();
     noFill();
-    pushMatrix();
-    translate(location.x, location.y);
+    //pushMatrix();
+    //translate(location.x, location.y);
 
     /*RENDERMODE! */
     if(localmode == 0.0f)
     {
+      pushMatrix();
+      translate(location.x, location.y);
         for (int i = 0; i<numberOfPoints; i++){
         numbers[i]=random(2,diameter+localvisualsize);
         }
@@ -664,20 +665,33 @@ public void render() {
           {vertex(numbers[numberOfPoints-1],numbers[0]);}
         }
         endShape();
+        popMatrix();
      }
     else if(localmode ==1.0f)
     {
-      float theta = velocity.heading2D() + radians(120);
+      pushMatrix();translate(location.x, location.y);
+      float theta = velocity.heading2D() + radians(210);
       stroke(localhue, localsaturation, localbrightness, localalpha);
       strokeWeight(localsweight);
       rotate(theta);
-      bezier(0, 0, random(0,localvisualsize), random(0,-localvisualsize), random(0,-localvisualsize), random(0,localvisualsize), 0, 0);
+      bezier(0, 0, localvisualsize*noise(10+diameter), localvisualsize*noise(10+diameter), -localvisualsize*noise(50+diameter), localvisualsize*noise(200+diameter), 0, 0);
+      bezier(0, 0, -localvisualsize*noise(50+diameter), -localvisualsize*noise(200+diameter), localvisualsize*noise(10+diameter), -localvisualsize*noise(10+diameter), 0, 0);
+      popMatrix();
     }
     else if(localmode == 2.0f)
     {
       noStroke();
-      fill(localhue, localsaturation,localbrightness, localalpha);
+/*      fill(localhue, localsaturation,localbrightness, localalpha);
       ellipse(0, 0, diameter+localvisualsize, diameter+localvisualsize);
+*/
+      if (localellipsemode==0.0f){
+       fill(localhue, localsaturation,localbrightness, localalpha);
+       ellipse(location.x, location.y, diameter+localvisualsize, diameter+localvisualsize);
+      }
+
+      else{
+        drawGradient(location.x, location.y, diameter+localvisualsize, localhue, localsaturation, localbrightness, localalpha);
+      }
     }
     else if(localmode == 3.0f)
     {
@@ -685,16 +699,16 @@ public void render() {
 
       if (localellipsemode==0.0f){
        fill(diameter*10, localsaturation,localbrightness, localalpha);
-       ellipse(0, 0, diameter+localvisualsize, diameter+localvisualsize);
+       ellipse(location.x, location.y, diameter+localvisualsize, diameter+localvisualsize);
       }
 
       else{
-        drawGradient(diameter+localvisualsize, diameter*10, localsaturation, localbrightness, localalpha);
+        drawGradient(location.x, location.y, diameter+localvisualsize, diameter*10, localsaturation, localbrightness, localalpha);
       }
 
     }
-  popMatrix();
-  noStroke();
+  //popMatrix();
+  //noStroke();
 }
 
   //wraparound 
@@ -821,22 +835,40 @@ public void borders() {
 }
 
 // 
-public void drawGradient(float radius, float ghue, float gsat, float gbri, float galp) {
+public void drawGradient(float x, float y, float radius, float ghue, float gsat, float gbri, float galp) {
   
   int r2 = PApplet.parseInt(radius);
   float h = 0;
 
   fill(ghue, gsat, gbri, galp);
-  ellipse(0,0,radius,radius);
+  ellipse(x,y,radius,radius);
 
     for (int r = r2+15; r > 0; --r)
     {
       fill(ghue, gsat, gbri, h);
-      ellipse(0, 0, r, r);
+      ellipse(x, y, r+5, r+5);
       h = (h + 1) % 50;
     }
 
 }
+/*
+void drawGradient(float radius, float ghue, float gsat, float gbri, float galp) {
+  
+  int r2 = int(radius);
+  float h = 0;
+
+  fill(ghue, gsat, gbri, galp);
+  ellipse(x,y,radius,radius);
+
+    for (int r = r2; r > 0; --r)
+    {
+      fill(ghue, gsat, gbri, h);
+      ellipse(0, 0, 40-r*r, 40-r*r);
+      h = (h + 1) % 50;
+    }
+
+}
+*/
 // The FLOCK, a list of Boid objects
 
 

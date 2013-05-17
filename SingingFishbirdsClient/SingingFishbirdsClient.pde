@@ -46,21 +46,21 @@ float localseparationforce = 1.5;
 float localalignmentforce = 1.0;
 float localcohesionforce = 1.4;
 float localmaxspeed = 2;
-float localseparationdistance = 40.0;
+float localseparationdistance = 100.0;
 float localsoundmodevar = 3;
-float localvisualsize = 2;
+float localvisualsize = 0;
 float localhue = 80;
-float localsaturation = 255;
+float localsaturation = 0;
 float localbrightness = 255;
-float localalpha = 100;
-float localmode = 3.0;
+float localalpha = 200;
+float localmode = 1.0;
 float localellipsemode = 0.0;
 
 float localstartedval=0.0;
 float localexitval = 0;
 float attractionval = 0.0;
 float localforexport = 0.0;
-float localframerate = 25.0;
+float localframerate = 60.0;
 
 float localxyweight = 0.0;
 float localxlocation = 0.0;
@@ -69,7 +69,7 @@ float toggleattractionval = 0.0;
 float xlocationreturn = 0.0;
 float ylocationreturn = 0.0;
 
-float localbackgroundalpha = 10;
+float localbackgroundalpha = 120;
 float localbgsaturation = 0;
 float localbgbrightness = 0;
 float localbghue = 0;
@@ -103,7 +103,7 @@ void setup() {
   oschost = new OscP5(this,9000);
 
   //change this to the ip of the host
-  hostlocation = new NetAddress("192.168.1.106",10000);
+  hostlocation = new NetAddress("169.254.170.253",10000);
 
   /*sound plugs*/
   oscP5.plug(this,"freq","/sound/Freq");
@@ -166,7 +166,6 @@ float[] numbers = new float[numberOfPoints];
 /*DRAW*/
 
 void draw() {
-
     frameRate(localframerate);
   if (localstartedval==1.0)
     {

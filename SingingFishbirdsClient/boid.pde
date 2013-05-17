@@ -103,12 +103,14 @@ void render() {
     }
     //smooth();
     noFill();
-    pushMatrix();
-    translate(location.x, location.y);
+    //pushMatrix();
+    //translate(location.x, location.y);
 
     /*RENDERMODE! */
     if(localmode == 0.0)
     {
+      pushMatrix();
+      translate(location.x, location.y);
         for (int i = 0; i<numberOfPoints; i++){
         numbers[i]=random(2,diameter+localvisualsize);
         }
@@ -126,20 +128,33 @@ void render() {
           {vertex(numbers[numberOfPoints-1],numbers[0]);}
         }
         endShape();
+        popMatrix();
      }
     else if(localmode ==1.0)
     {
-      float theta = velocity.heading2D() + radians(120);
+      pushMatrix();translate(location.x, location.y);
+      float theta = velocity.heading2D() + radians(210);
       stroke(localhue, localsaturation, localbrightness, localalpha);
       strokeWeight(localsweight);
       rotate(theta);
-      bezier(0, 0, random(0,localvisualsize), random(0,-localvisualsize), random(0,-localvisualsize), random(0,localvisualsize), 0, 0);
+      bezier(0, 0, localvisualsize*noise(10+diameter), localvisualsize*noise(10+diameter), -localvisualsize*noise(50+diameter), localvisualsize*noise(200+diameter), 0, 0);
+      bezier(0, 0, -localvisualsize*noise(50+diameter), -localvisualsize*noise(200+diameter), localvisualsize*noise(10+diameter), -localvisualsize*noise(10+diameter), 0, 0);
+      popMatrix();
     }
     else if(localmode == 2.0)
     {
       noStroke();
-      fill(localhue, localsaturation,localbrightness, localalpha);
+/*      fill(localhue, localsaturation,localbrightness, localalpha);
       ellipse(0, 0, diameter+localvisualsize, diameter+localvisualsize);
+*/
+      if (localellipsemode==0.0){
+       fill(localhue, localsaturation,localbrightness, localalpha);
+       ellipse(location.x, location.y, diameter+localvisualsize, diameter+localvisualsize);
+      }
+
+      else{
+        drawGradient(location.x, location.y, diameter+localvisualsize, localhue, localsaturation, localbrightness, localalpha);
+      }
     }
     else if(localmode == 3.0)
     {
@@ -147,16 +162,16 @@ void render() {
 
       if (localellipsemode==0.0){
        fill(diameter*10, localsaturation,localbrightness, localalpha);
-       ellipse(0, 0, diameter+localvisualsize, diameter+localvisualsize);
+       ellipse(location.x, location.y, diameter+localvisualsize, diameter+localvisualsize);
       }
 
       else{
-        drawGradient(diameter+localvisualsize, diameter*10, localsaturation, localbrightness, localalpha);
+        drawGradient(location.x, location.y, diameter+localvisualsize, diameter*10, localsaturation, localbrightness, localalpha);
       }
 
     }
-  popMatrix();
-  noStroke();
+  //popMatrix();
+  //noStroke();
 }
 
   //wraparound 
@@ -283,19 +298,37 @@ void borders() {
 }
 
 // 
+void drawGradient(float x, float y, float radius, float ghue, float gsat, float gbri, float galp) {
+  
+  int r2 = int(radius);
+  float h = 0;
+
+  fill(ghue, gsat, gbri, galp);
+  ellipse(x,y,radius,radius);
+
+    for (int r = r2+15; r > 0; --r)
+    {
+      fill(ghue, gsat, gbri, h);
+      ellipse(x, y, r+5, r+5);
+      h = (h + 1) % 50;
+    }
+
+}
+/*
 void drawGradient(float radius, float ghue, float gsat, float gbri, float galp) {
   
   int r2 = int(radius);
   float h = 0;
 
   fill(ghue, gsat, gbri, galp);
-  ellipse(0,0,radius,radius);
+  ellipse(x,y,radius,radius);
 
-    for (int r = r2+15; r > 0; --r)
+    for (int r = r2; r > 0; --r)
     {
       fill(ghue, gsat, gbri, h);
-      ellipse(0, 0, r, r);
+      ellipse(0, 0, 40-r*r, 40-r*r);
       h = (h + 1) % 50;
     }
 
 }
+*/
