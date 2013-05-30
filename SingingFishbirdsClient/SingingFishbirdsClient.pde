@@ -48,7 +48,7 @@ float localcohesionforce = 1.4;
 float localmaxspeed = 2;
 float localseparationdistance = 100.0;
 float localsoundmodevar = 3;
-float localvisualsize = 0;
+float localvisualsize = 120;
 float localhue = 80;
 float localsaturation = 0;
 float localbrightness = 255;
@@ -56,7 +56,7 @@ float localalpha = 200;
 float localmode = 1.0;
 float localellipsemode = 0.0;
 
-float localstartedval=0.0;
+float localstartedval=1.0;
 float localexitval = 0;
 float attractionval = 0.0;
 float localforexport = 0.0;
